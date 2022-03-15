@@ -1,10 +1,19 @@
 {
-  "name": "template",
+  "name": "cds-change-log",
   "version": "0.0.1",
   "main": "lib/index.js",
+  "description": "best practice of Change Log for CAP nodejs runtime",
   "engines": {
     "node": ">=12",
     "npm": ">=6"
+  },
+  "author": {
+    "name": "Theo Sun",
+    "email": "theo.sun@outlook.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Soontao/cds-change-log"
   },
   "scripts": {
     "test": "jest --detectOpenHandles --passWithNoTests",
@@ -34,5 +43,6 @@
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
-  }
+  },
+  "license": "Apache-2.0"
 }
