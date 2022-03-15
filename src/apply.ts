@@ -3,9 +3,9 @@ import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./con
 
 export function isChangeLogEnabled(def: any) {
   if (def !== undefined) {
-    return ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true
+    return ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true;
   }
-  return false
+  return false;
 }
 
 /**
@@ -18,16 +18,16 @@ export function extractKeyNamesFromEntity(entityDef: any) {
   // TODO: concern about multi key in single entity
   return Object
     .entries(entityDef?.elements ?? [])
-    .filter(([key, value]) => (value as any)?.key)
-    .map(([key, value]) => key)
+    .filter(([_, value]) => (value as any)?.key)
+    .map(([key, _]) => key);
 }
 
-export function isChangeLogInternalEntity(name: string = '') {
-  return name.startsWith(CHANGELOG_NAMESPACE)
+export function isChangeLogInternalEntity(name: string = "") {
+  return name.startsWith(CHANGELOG_NAMESPACE);
 }
 
 export function extractEntityNameFromQuery(query: any): string {
-  return query?.INSERT?.into
+  return query?.INSERT?.into;
 }
 
 /**
@@ -36,28 +36,28 @@ export function extractEntityNameFromQuery(query: any): string {
  * @param cds cds facade
  */
 export function applyChangeLog(cds: any) {
-  const { INSERT } = cds.ql
+  const { INSERT } = cds.ql;
   cds.on("served", async () => {
-    const db = await cds.connect.to("db")
+    const db = await cds.connect.to("db");
     if (ENTITIES.CHANGELOG in cds?.model?.definitions) {
       db.prepend((srv: any) => {
         srv.on(
-          ['CREATE', 'UPDATE', 'DELETE'],
+          ["CREATE", "UPDATE", "DELETE"],
           async function changeLogHandler(req: any, next: Function) {
             const { query } = req;
-            const executionResult = await next()
+            const executionResult = await next();
 
-            const entityName = extractEntityNameFromQuery(query)
+            const entityName = extractEntityNameFromQuery(query);
             if (isChangeLogInternalEntity(entityName)) {
-              return executionResult
+              return executionResult;
             }
 
-            const entityDef = cds.model.definitions[entityName]
+            const entityDef = cds.model.definitions[entityName];
             if (!isChangeLogEnabled(entityDef)) {
-              return executionResult
+              return executionResult;
             }
 
-            const keyNames = extractKeyNamesFromEntity(entityDef)
+            const keyNames = extractKeyNamesFromEntity(entityDef);
 
 
             switch (req.event) {
@@ -75,15 +75,15 @@ export function applyChangeLog(cds: any) {
                         attributeOldValue: null,
                       }))
                     })
-                )
+                );
                 break;
               default:
                 break;
             }
 
-            return executionResult
-          })
-      })
+            return executionResult;
+          });
+      });
     }
 
   });
