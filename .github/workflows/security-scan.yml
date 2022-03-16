@@ -11,10 +11,11 @@ on:
     - cron: "3 5 * * *"
 
 jobs:
-  build:
+  security-scan:
+
     runs-on: ubuntu-latest
 
-    timeout-minutes: 3
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v1
