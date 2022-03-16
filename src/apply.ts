@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./constants";
 import { defaultStringOrNull } from "./utils";
 
@@ -50,21 +51,24 @@ export function extractEntityNameFromQuery(query: any): string {
  * @param change change value from requests, optional
  * @returns 
  */
-const buildChangeLog = (cdsEntityName: string, keyNames: Array<string>, elementsKeys: Array<string>, original?: any, change?: any) => {
+const buildChangeLog = (
+  cdsEntityName: string,
+  keyNames: Array<string>,
+  elementsKeys: Array<string>, original?: any, change?: any) => {
   let changeLogAction: string | undefined;
   if (original === undefined && change !== undefined) {
-    changeLogAction = "Create"
+    changeLogAction = "Create";
   }
   if (original !== undefined && change === undefined) {
-    changeLogAction = "Delete"
+    changeLogAction = "Delete";
   }
   if (original !== undefined && change !== undefined) {
-    changeLogAction = "Update"
+    changeLogAction = "Update";
   }
 
 
   if (changeLogAction === undefined) {
-    throw new TypeError("require original data or change data at least")
+    throw new TypeError("require original data or change data at least");
   }
 
   return {
@@ -78,14 +82,14 @@ const buildChangeLog = (cdsEntityName: string, keyNames: Array<string>, elements
           let attributeOldValue = null;
           switch (changeLogAction) {
             case "Create":
-              attributeNewValue = defaultStringOrNull(change[key])
+              attributeNewValue = defaultStringOrNull(change[key]);
               break;
             case "Delete":
-              attributeOldValue = defaultStringOrNull(original[key])
-              break
+              attributeOldValue = defaultStringOrNull(original[key]);
+              break;
             case "Update":
-              attributeNewValue = defaultStringOrNull(change[key])
-              attributeOldValue = defaultStringOrNull(original[key])
+              attributeNewValue = defaultStringOrNull(change[key]);
+              attributeOldValue = defaultStringOrNull(original[key]);
             default:
               break;
           }
@@ -95,16 +99,16 @@ const buildChangeLog = (cdsEntityName: string, keyNames: Array<string>, elements
             attributeKey: key,
             attributeNewValue,
             attributeOldValue,
-          }
+          };
         }
       )
       .filter(item => item.attributeNewValue !== item.attributeOldValue)
       .map((item, idx) => {
-        item.sequence = idx
-        return item
+        item.sequence = idx;
+        return item;
       })
-  }
-}
+  };
+};
 
 /**
  * apply change log 
@@ -142,19 +146,19 @@ export function applyChangeLog(cds: any) {
             const changeLogs: any[] = [];
 
             const findQuery = SELECT.from(entityName).columns(...keyNames, ...elementsKeys);
-            const where = query?.DELETE?.where ?? query?.UPDATE?.where
-            if (where !== undefined) { findQuery.where(where) }
+            const where = query?.DELETE?.where ?? query?.UPDATE?.where;
+            if (where !== undefined) { findQuery.where(where); }
 
             switch (req.event) {
               case "CREATE":
                 const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-                data.forEach(change => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, undefined, change)))
+                data.forEach(change => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, undefined, change)));
                 break;
               case "DELETE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original)))
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original)));
                 break;
               case "UPDATE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original, req.data)))
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original, req.data)));
                 break;
               default:
                 break;
