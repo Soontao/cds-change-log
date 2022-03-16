@@ -1,4 +1,5 @@
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./constants";
+import { defaultStringOrNull } from "./utils";
 
 
 export function isChangeLogEnabled(def: any) {
@@ -36,6 +37,75 @@ export function extractEntityNameFromQuery(query: any): string {
   return query?.INSERT?.into ?? query?.UPDATE?.entity ?? query?.DELETE?.from;
 }
 
+
+/**
+ * build change log object from data
+ * 
+ * @internal
+ * @private
+ * @param cdsEntityName entity name
+ * @param keyNames keys of entity
+ * @param elementsKeys columns of entity
+ * @param original original value in db, optional
+ * @param change change value from requests, optional
+ * @returns 
+ */
+const buildChangeLog = (cdsEntityName: string, keyNames: Array<string>, elementsKeys: Array<string>, original?: any, change?: any) => {
+  let changeLogAction: string | undefined;
+  if (original === undefined && change !== undefined) {
+    changeLogAction = "Create"
+  }
+  if (original !== undefined && change === undefined) {
+    changeLogAction = "Delete"
+  }
+  if (original !== undefined && change !== undefined) {
+    changeLogAction = "Update"
+  }
+
+
+  if (changeLogAction === undefined) {
+    throw new TypeError("require original data or change data at least")
+  }
+
+  return {
+    cdsEntityName,
+    cdsEntityKey: change?.[keyNames[0]] ?? original?.[keyNames[0]],
+    changeLogAction,
+    Items: elementsKeys
+      .map(
+        (key) => {
+          let attributeNewValue = null;
+          let attributeOldValue = null;
+          switch (changeLogAction) {
+            case "Create":
+              attributeNewValue = defaultStringOrNull(change[key])
+              break;
+            case "Delete":
+              attributeOldValue = defaultStringOrNull(original[key])
+              break
+            case "Update":
+              attributeNewValue = defaultStringOrNull(change[key])
+              attributeOldValue = defaultStringOrNull(original[key])
+            default:
+              break;
+          }
+
+          return {
+            sequence: 0,
+            attributeKey: key,
+            attributeNewValue,
+            attributeOldValue,
+          }
+        }
+      )
+      .filter(item => item.attributeNewValue !== item.attributeOldValue)
+      .map((item, idx) => {
+        item.sequence = idx
+        return item
+      })
+  }
+}
+
 /**
  * apply change log 
  * 
@@ -71,70 +141,20 @@ export function applyChangeLog(cds: any) {
 
             const changeLogs: any[] = [];
 
+            const findQuery = SELECT.from(entityName).columns(...keyNames, ...elementsKeys);
+            const where = query?.DELETE?.where ?? query?.UPDATE?.where
+            if (where !== undefined) { findQuery.where(where) }
+
             switch (req.event) {
               case "CREATE":
-                let data = req.data;
-                if (!(data instanceof Array)) {
-                  data = [data];
-                }
-
-                changeLogs.push(
-                  ...data.map((entry: any) => ({
-                    cdsEntityName: entityDef.name,
-                    cdsEntityKey: entry[keyNames[0]],
-                    changeLogAction: "Create",
-                    Items: elementsKeys.map((key, idx) => ({
-                      sequence: idx,
-                      attributeKey: key,
-                      attributeNewValue: String(entry[key]),
-                      attributeOldValue: null,
-                    }))
-                  }))
-                );
-
+                const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
+                data.forEach(change => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, undefined, change)))
                 break;
               case "DELETE":
-                const deleteOriginalData: [] = await db.run(
-                  SELECT.from(entityName).columns(...keyNames, ...elementsKeys).where(query.DELETE.where)
-                );
-                changeLogs.push(...deleteOriginalData.map((original) => ({
-                  cdsEntityName: entityDef.name,
-                  cdsEntityKey: original[keyNames[0]],
-                  changeLogAction: "Delete",
-                  Items: elementsKeys.map((key, idx) => ({
-                    sequence: idx,
-                    attributeKey: key,
-                    attributeNewValue: null,
-                    attributeOldValue: String(original[key]),
-                  }))
-                })));
-
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original)))
                 break;
               case "UPDATE":
-
-                // query original values from database
-                const original: [] = await db.run(
-                  SELECT.from(entityName).columns(...keyNames, ...elementsKeys).where(query.UPDATE.where)
-                );
-
-                changeLogs.push(
-                  ...original
-                    .map((originalItem: any) => ({
-                      cdsEntityName: entityDef.name,
-                      cdsEntityKey: originalItem[keyNames[0]],
-                      changeLogAction: "Update",
-                      Items: elementsKeys
-                        .filter((key) => originalItem[key] !== req.data[key])
-                        .map((key, idx) => ({
-                          sequence: idx,
-                          attributeKey: key,
-                          attributeNewValue: String(req.data[key]),
-                          attributeOldValue: String(originalItem[key]),
-                        }))
-                    }))
-                    .filter(changeLog => changeLog.Items.length > 0)
-                );
-
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original, req.data)))
                 break;
               default:
                 break;

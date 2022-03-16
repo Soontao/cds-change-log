@@ -61,6 +61,15 @@ describe("Multi Change Test Suite", () => {
     ])
   });
 
+  it('should support delete multi value', async () => {
+
+    await cds.run(DELETE.from("People"))
+
+    const result = await cds.run(SELECT.one.from("People").columns("count(1) as total"))
+
+    expect(result?.total ?? result?.TOTAL).toBe(0)
+  });
+
 
 
 

@@ -2,9 +2,12 @@ using {
   cuid,
   managed
 } from '@sap/cds/common';
-using {cap} from '../../../index.cds';
+using from '../../../index.cds';
+using customManaged from './common';
+using from './extend';
 
-entity People : cuid, managed {
+
+entity People : cuid, managed, customManaged {
   Name : String(255);
   Age  : Integer;
 }

@@ -8,8 +8,9 @@
 ## Features
 
 - [x] single `CUD` OData requests 
-- [ ] multi `CUD` CQL
-- [ ] aspect support
+- [x] multi `CUD` CQL
+- [x] all `Update/Delete` CQL (without `where`)
+- [x] aspect support
 - [ ] localization support
 - [ ] multi primary key support
-- [ ] extension field support
+- [x] extension field support
