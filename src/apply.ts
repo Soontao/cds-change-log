@@ -22,12 +22,16 @@ export function extractKeyNamesFromEntity(entityDef: any) {
     .map(([key, _]) => key);
 }
 
+export function extractChangeAwareElements(entityDef: any): Array<string> {
+  return Object.entries(entityDef?.elements).filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true).map(([key]) => key)
+}
+
 export function isChangeLogInternalEntity(name: string = "") {
   return name.startsWith(CHANGELOG_NAMESPACE);
 }
 
 export function extractEntityNameFromQuery(query: any): string {
-  return query?.INSERT?.into;
+  return query?.INSERT?.into ?? query?.UPDATE?.entity;
 }
 
 /**
@@ -36,52 +40,94 @@ export function extractEntityNameFromQuery(query: any): string {
  * @param cds cds facade
  */
 export function applyChangeLog(cds: any) {
-  const { INSERT } = cds.ql;
+  const { INSERT, SELECT } = cds.ql;
   cds.on("served", async () => {
     const db = await cds.connect.to("db");
     if (ENTITIES.CHANGELOG in cds?.model?.definitions) {
       db.prepend((srv: any) => {
         srv.on(
           ["CREATE", "UPDATE", "DELETE"],
-          async function changeLogHandler(req: any, next: Function) {
+          async function changeLogHandler(req: any, next: () => Promise<any>) {
             const { query } = req;
-            const executionResult = await next();
 
             const entityName = extractEntityNameFromQuery(query);
             if (isChangeLogInternalEntity(entityName)) {
-              return executionResult;
+              return next();
             }
 
             const entityDef = cds.model.definitions[entityName];
             if (!isChangeLogEnabled(entityDef)) {
-              return executionResult;
+              return next();
+            }
+
+            const elementsKeys = extractChangeAwareElements(entityDef)
+
+            if (elementsKeys.length === 0) {
+              return next()
             }
 
             const keyNames = extractKeyNamesFromEntity(entityDef);
 
+            const changeLogs: any[] = [];
 
             switch (req.event) {
               case "CREATE":
-                await db.run(
-                  INSERT
-                    .into(ENTITIES.CHANGELOG)
-                    .entries({
-                      cdsEntityName: entityDef.name,
-                      cdsEntityKey: req.data[keyNames[0]],
-                      changeLogAction: "Create",
-                      ChangeItems: Object.entries(req.data).map(([key, value]) => ({
-                        attributeKey: key,
-                        attributeNewValue: String(value),
-                        attributeOldValue: null,
-                      }))
-                    })
-                );
+                changeLogs.push({
+                  cdsEntityName: entityDef.name,
+                  cdsEntityKey: req.data[keyNames[0]],
+                  changeLogAction: "Create",
+                  ChangeItems: elementsKeys.map((key) => ({
+                    attributeKey: key,
+                    attributeNewValue: String(req.data[key]),
+                    attributeOldValue: null,
+                  }))
+                })
+
+
+                break;
+              case "UPDATE":
+                // query original values from database
+                const original: [] = await db.run(
+                  SELECT.from(entityName).where(query.UPDATE.where)
+                )
+
+                if (original.length > 0) {
+
+                  original
+                    .forEach((originalItem: any) => {
+                      const localChangeLog = {
+                        cdsEntityName: entityDef.name,
+                        cdsEntityKey: originalItem[keyNames[0]],
+                        changeLogAction: "Update",
+                        ChangeItems: elementsKeys
+                          .filter((key) => originalItem[key] !== req.data[key])
+                          .map((key) => ({
+                            attributeKey: key,
+                            attributeNewValue: String(req.data[key]),
+                            attributeOldValue: String(originalItem[key]),
+                          }))
+                      }
+
+                      if (localChangeLog.ChangeItems.length > 0) {
+                        changeLogs.push(localChangeLog)
+                      }
+                    });
+
+                }
                 break;
               default:
                 break;
             }
 
-            return executionResult;
+            if (changeLogs.length > 0) {
+              return next()
+                .then(() => db.run(
+                  INSERT
+                    .into(ENTITIES.CHANGELOG)
+                    .entries(...changeLogs)
+                ))
+            }
+            return next();
           });
       });
     }

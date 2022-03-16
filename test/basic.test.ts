@@ -2,7 +2,7 @@
 import { setupIgnoreStatus, setupTest } from "./utils";
 
 
-describe("Demo Test Suite", () => {
+describe("Basic Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
 
@@ -24,6 +24,16 @@ describe("Demo Test Suite", () => {
     expect(response.status).toBe(201)
   });
 
+
+  it('should support update data', async () => {
+    let response = await axios.post("/sample/Peoples", { Name: "Theo Sun 2", Age: 39 })
+    expect(response.status).toBe(201)
+    const { ID } = response.data
+    expect(ID).not.toBeUndefined()
+
+    response = await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
+    expect(response.status).toBe(200)
+  });
 
 
 });
