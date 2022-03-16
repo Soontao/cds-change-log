@@ -14,3 +14,5 @@
 - [ ] localization support
 - [ ] multi primary key support
 - [x] extension field support
+- [ ] Samples
+  - [ ] for fiori elements
