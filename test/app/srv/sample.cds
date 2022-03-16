@@ -1,7 +1,7 @@
 namespace test.app.srv.s1;
 
 using {People} from '../db';
-using {cap.community.common} from '../../../src';
+using {cap.community.common} from '../../../index.cds';
 
 
 using {

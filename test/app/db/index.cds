@@ -2,7 +2,7 @@ using {
   cuid,
   managed
 } from '@sap/cds/common';
-using {cap} from '../../../src';
+using {cap} from '../../../index.cds';
 
 entity People : cuid, managed {
   Name : String(255);
