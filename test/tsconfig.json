@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.base",
   "compilerOptions": {
-    "strict": false
+    "strict": false,
+    "noImplicitAny": false
   }
 }

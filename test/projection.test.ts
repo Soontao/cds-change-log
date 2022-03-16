@@ -2,7 +2,7 @@
 import { setupIgnoreStatus, setupTest } from "./utils";
 
 
-describe("Basic Test Suite", () => {
+describe("Projection Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
 
@@ -10,28 +10,28 @@ describe("Basic Test Suite", () => {
 
   it('should support connect to service', async () => {
     const { data } = await axios.get("/sample/$metadata")
-    expect(data).toMatch(/Peoples/)
+    expect(data).toMatch(/ProjectedPeople/)
   });
 
   it('should support query data', async () => {
-    const response = await axios.get("/sample/Peoples")
+    const response = await axios.get("/sample/ProjectedPeople")
     expect(response.status).toBe(200)
     expect(response.data.value).toHaveLength(0)
   });
 
   it('should support create data', async () => {
-    const response = await axios.post("/sample/Peoples", { Name: "Theo Sun", Age: 27 })
+    const response = await axios.post("/sample/ProjectedPeople", { Name: "Theo Sun", Age: 27 })
     expect(response.status).toBe(201)
   });
 
 
   it('should support update data', async () => {
-    let response = await axios.post("/sample/Peoples", { Name: "Theo Sun 2", Age: 39 })
+    let response = await axios.post("/sample/ProjectedPeople", { Name: "Theo Sun 2", Age: 39 })
     expect(response.status).toBe(201)
     const { ID } = response.data
     expect(ID).not.toBeUndefined()
 
-    response = await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
+    response = await axios.patch(`/sample/ProjectedPeople(${ID})`, { Name: "Theo Sun 9", Age: 12 })
     expect(response.status).toBe(200)
 
 
@@ -81,56 +81,17 @@ describe("Basic Test Suite", () => {
   });
 
   it('should support delete data', async () => {
-    let response = await axios.post("/sample/Peoples", { Name: "Theo Sun", Age: 27 })
+    let response = await axios.post("/sample/ProjectedPeople", { Name: "Theo Sun", Age: 27 })
     expect(response.status).toBe(201)
 
     const { ID } = response.data
     expect(ID).not.toBeUndefined()
-    response = await axios.delete(`/sample/Peoples(${ID})`)
+    response = await axios.delete(`/sample/ProjectedPeople(${ID})`)
     expect(response.status).toBe(204)
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=cdsEntityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$expand=Items&$filter=cdsEntityKey eq ${ID}`)
     expect(response.status).toBe(200)
     expect(response.data.value).toHaveLength(2)
-
-    expect(response.data.value).toMatchObject([
-      {
-        cdsEntityName: "People",
-        changeLogAction: "Create",
-        Items: [
-          {
-            sequence: 0,
-            attributeKey: "Name",
-            attributeNewValue: "Theo Sun",
-            attributeOldValue: null,
-          },
-          {
-            sequence: 1,
-            attributeKey: "Age",
-            attributeNewValue: "27",
-            attributeOldValue: null,
-          },
-        ],
-      },
-      {
-        cdsEntityName: "People",
-        changeLogAction: "Delete",
-        Items: [
-          {
-            sequence: 0,
-            attributeKey: "Name",
-            attributeNewValue: null,
-            attributeOldValue: "Theo Sun",
-          },
-          {
-            sequence: 1,
-            attributeKey: "Age",
-            attributeNewValue: null,
-            attributeOldValue: "27",
-          },
-        ],
-      },
-    ])
   });
 
 

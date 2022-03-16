@@ -31,7 +31,7 @@ export function isChangeLogInternalEntity(name: string = "") {
 }
 
 export function extractEntityNameFromQuery(query: any): string {
-  return query?.INSERT?.into ?? query?.UPDATE?.entity;
+  return query?.INSERT?.into ?? query?.UPDATE?.entity ?? query?.DELETE?.from;
 }
 
 /**
@@ -51,17 +51,16 @@ export function applyChangeLog(cds: any) {
             const { query } = req;
 
             const entityName = extractEntityNameFromQuery(query);
-            if (isChangeLogInternalEntity(entityName)) {
+            if (entityName === undefined && isChangeLogInternalEntity(entityName)) {
               return next();
             }
 
             const entityDef = cds.model.definitions[entityName];
-            if (!isChangeLogEnabled(entityDef)) {
+            if (entityDef === undefined || !isChangeLogEnabled(entityDef)) {
               return next();
             }
 
             const elementsKeys = extractChangeAwareElements(entityDef)
-
             if (elementsKeys.length === 0) {
               return next()
             }
@@ -72,50 +71,68 @@ export function applyChangeLog(cds: any) {
 
             switch (req.event) {
               case "CREATE":
-                changeLogs.push({
+                let data = req.data
+                if (!(data instanceof Array)) {
+                  data = [data]
+                }
+                
+                changeLogs.push(
+                  ...data.map((entry: any) => ({
+                    cdsEntityName: entityDef.name,
+                    cdsEntityKey: entry[keyNames[0]],
+                    changeLogAction: "Create",
+                    Items: elementsKeys.map((key, idx) => ({
+                      sequence: idx,
+                      attributeKey: key,
+                      attributeNewValue: String(entry[key]),
+                      attributeOldValue: null,
+                    }))
+                  }))
+                )
+
+                break;
+              case "DELETE":
+                const deleteOriginalData: [] = await db.run(
+                  SELECT.from(entityName).where(query.DELETE.where)
+                )
+                changeLogs.push(...deleteOriginalData.map((original) => ({
                   cdsEntityName: entityDef.name,
-                  cdsEntityKey: req.data[keyNames[0]],
-                  changeLogAction: "Create",
+                  cdsEntityKey: original[keyNames[0]],
+                  changeLogAction: "Delete",
                   Items: elementsKeys.map((key, idx) => ({
                     sequence: idx,
                     attributeKey: key,
-                    attributeNewValue: String(req.data[key]),
-                    attributeOldValue: null,
+                    attributeNewValue: null,
+                    attributeOldValue: String(original[key]),
                   }))
-                })
-
+                })))
 
                 break;
               case "UPDATE":
+
                 // query original values from database
                 const original: [] = await db.run(
                   SELECT.from(entityName).where(query.UPDATE.where)
                 )
 
-                if (original.length > 0) {
+                changeLogs.push(
+                  ...original
+                    .map((originalItem: any) => ({
+                      cdsEntityName: entityDef.name,
+                      cdsEntityKey: originalItem[keyNames[0]],
+                      changeLogAction: "Update",
+                      Items: elementsKeys
+                        .filter((key) => originalItem[key] !== req.data[key])
+                        .map((key, idx) => ({
+                          sequence: idx,
+                          attributeKey: key,
+                          attributeNewValue: String(req.data[key]),
+                          attributeOldValue: String(originalItem[key]),
+                        }))
+                    }))
+                    .filter(changeLog => changeLog.Items.length > 0)
+                );
 
-                  original
-                    .forEach((originalItem: any) => {
-                      const localChangeLog = {
-                        cdsEntityName: entityDef.name,
-                        cdsEntityKey: originalItem[keyNames[0]],
-                        changeLogAction: "Update",
-                        Items: elementsKeys
-                          .filter((key) => originalItem[key] !== req.data[key])
-                          .map((key, idx) => ({
-                            sequence: idx,
-                            attributeKey: key,
-                            attributeNewValue: String(req.data[key]),
-                            attributeOldValue: String(originalItem[key]),
-                          }))
-                      }
-
-                      if (localChangeLog.Items.length > 0) {
-                        changeLogs.push(localChangeLog)
-                      }
-                    });
-
-                }
                 break;
               default:
                 break;
@@ -123,15 +140,17 @@ export function applyChangeLog(cds: any) {
 
             if (changeLogs.length > 0) {
               return next()
-                .then(() => db.run(
+                .then((result) => db.run(
                   INSERT
                     .into(ENTITIES.CHANGELOG)
                     .entries(...changeLogs)
-                ))
+                ).then(() => result))
             }
             return next();
           });
       });
+    } else {
+      // TODO: log that change log is not included in model
     }
 
   });
