@@ -33,6 +33,51 @@ describe("Basic Test Suite", () => {
 
     response = await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
     expect(response.status).toBe(200)
+
+
+    response = await axios.get(`/sample/ChangeLogs?$expand=Items&$filter=cdsEntityKey eq ${ID}`)
+
+    expect(response.status).toBe(200)
+
+    expect(response.data.value).toMatchObject([
+      {
+        modifiedBy: "anonymous",
+        cdsEntityName: "People",
+        changeLogAction: "Create",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: "Theo Sun 2",
+            attributeOldValue: null,
+          },
+          {
+            sequence: 1,
+            attributeKey: "Age",
+            attributeNewValue: "39",
+            attributeOldValue: null,
+          },
+        ],
+      },
+      {
+        cdsEntityName: "People",
+        changeLogAction: "Update",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: "Theo Sun 9",
+            attributeOldValue: "Theo Sun 2",
+          },
+          {
+            sequence: 1,
+            attributeKey: "Age",
+            attributeNewValue: "12",
+            attributeOldValue: "39",
+          },
+        ],
+      },
+    ])
   });
 
 

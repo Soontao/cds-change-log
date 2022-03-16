@@ -76,7 +76,8 @@ export function applyChangeLog(cds: any) {
                   cdsEntityName: entityDef.name,
                   cdsEntityKey: req.data[keyNames[0]],
                   changeLogAction: "Create",
-                  ChangeItems: elementsKeys.map((key) => ({
+                  Items: elementsKeys.map((key, idx) => ({
+                    sequence: idx,
                     attributeKey: key,
                     attributeNewValue: String(req.data[key]),
                     attributeOldValue: null,
@@ -99,16 +100,17 @@ export function applyChangeLog(cds: any) {
                         cdsEntityName: entityDef.name,
                         cdsEntityKey: originalItem[keyNames[0]],
                         changeLogAction: "Update",
-                        ChangeItems: elementsKeys
+                        Items: elementsKeys
                           .filter((key) => originalItem[key] !== req.data[key])
-                          .map((key) => ({
+                          .map((key, idx) => ({
+                            sequence: idx,
                             attributeKey: key,
                             attributeNewValue: String(req.data[key]),
                             attributeOldValue: String(originalItem[key]),
                           }))
                       }
 
-                      if (localChangeLog.ChangeItems.length > 0) {
+                      if (localChangeLog.Items.length > 0) {
                         changeLogs.push(localChangeLog)
                       }
                     });
