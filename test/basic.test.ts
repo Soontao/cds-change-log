@@ -35,15 +35,15 @@ describe("Basic Test Suite", () => {
     expect(response.status).toBe(200)
 
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=cdsEntityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
 
     expect(response.status).toBe(200)
 
     expect(response.data.value).toMatchObject([
       {
         modifiedBy: "anonymous",
-        cdsEntityName: "People",
-        changeLogAction: "Create",
+        entityName: "People",
+        action: "Create",
         Items: [
           {
             sequence: 0,
@@ -60,8 +60,8 @@ describe("Basic Test Suite", () => {
         ],
       },
       {
-        cdsEntityName: "People",
-        changeLogAction: "Update",
+        entityName: "People",
+        action: "Update",
         Items: [
           {
             sequence: 0,
@@ -89,14 +89,14 @@ describe("Basic Test Suite", () => {
     response = await axios.delete(`/sample/Peoples(${ID})`)
     expect(response.status).toBe(204)
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=cdsEntityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
     expect(response.status).toBe(200)
     expect(response.data.value).toHaveLength(2)
 
     expect(response.data.value).toMatchObject([
       {
-        cdsEntityName: "People",
-        changeLogAction: "Create",
+        entityName: "People",
+        action: "Create",
         Items: [
           {
             sequence: 0,
@@ -113,8 +113,8 @@ describe("Basic Test Suite", () => {
         ],
       },
       {
-        cdsEntityName: "People",
-        changeLogAction: "Delete",
+        entityName: "People",
+        action: "Delete",
         Items: [
           {
             sequence: 0,

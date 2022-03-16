@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./constants";
+import { ACTIONS, ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./constants";
 import { defaultStringOrNull } from "./utils";
 
 
@@ -44,7 +44,7 @@ export function extractEntityNameFromQuery(query: any): string {
  * 
  * @internal
  * @private
- * @param cdsEntityName entity name
+ * @param entityName entity name
  * @param keyNames keys of entity
  * @param elementsKeys columns of entity
  * @param original original value in db, optional
@@ -52,42 +52,42 @@ export function extractEntityNameFromQuery(query: any): string {
  * @returns 
  */
 const buildChangeLog = (
-  cdsEntityName: string,
+  entityName: string,
   keyNames: Array<string>,
   elementsKeys: Array<string>, original?: any, change?: any) => {
-  let changeLogAction: string | undefined;
+  let action: string | undefined;
   if (original === undefined && change !== undefined) {
-    changeLogAction = "Create";
+    action = ACTIONS.Create;
   }
   if (original !== undefined && change === undefined) {
-    changeLogAction = "Delete";
+    action = ACTIONS.Delete;
   }
   if (original !== undefined && change !== undefined) {
-    changeLogAction = "Update";
+    action = ACTIONS.Update;
   }
 
 
-  if (changeLogAction === undefined) {
+  if (action === undefined) {
     throw new TypeError("require original data or change data at least");
   }
 
   return {
-    cdsEntityName,
-    cdsEntityKey: change?.[keyNames[0]] ?? original?.[keyNames[0]],
-    changeLogAction,
+    entityName,
+    entityKey: change?.[keyNames[0]] ?? original?.[keyNames[0]],
+    action,
     Items: elementsKeys
       .map(
         (key) => {
           let attributeNewValue = null;
           let attributeOldValue = null;
-          switch (changeLogAction) {
-            case "Create":
+          switch (action) {
+            case ACTIONS.Create:
               attributeNewValue = defaultStringOrNull(change[key]);
               break;
-            case "Delete":
+            case ACTIONS.Delete:
               attributeOldValue = defaultStringOrNull(original[key]);
               break;
-            case "Update":
+            case ACTIONS.Update:
               attributeNewValue = defaultStringOrNull(change[key]);
               attributeOldValue = defaultStringOrNull(original[key]);
             default:

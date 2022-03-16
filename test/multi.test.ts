@@ -17,14 +17,14 @@ describe("Multi Change Test Suite", () => {
     const changeLogs = await cds.run(
       SELECT
         .from(ENTITIES.CHANGELOG, (c: any) => { c("*"), c.Items('*') })
-        .where({ cdsEntityKey: { in: results.map((result: any) => result.ID) } })
+        .where({ entityKey: { in: results.map((result: any) => result.ID) } })
     )
     expect(changeLogs).toHaveLength(2)
 
     expect(changeLogs).toMatchObject([
       {
-        cdsEntityName: "People",
-        changeLogAction: "Create",
+        entityName: "People",
+        action: "Create",
         Items: [
           {
             sequence: 0,
@@ -41,8 +41,8 @@ describe("Multi Change Test Suite", () => {
         ],
       },
       {
-        cdsEntityName: "People",
-        changeLogAction: "Create",
+        entityName: "People",
+        action: "Create",
         Items: [
           {
             sequence: 0,

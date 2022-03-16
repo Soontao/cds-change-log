@@ -17,14 +17,14 @@ describe("Extension Fields Test Suite", () => {
     response = await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12, SourceSystem: "SS2", Weight: 75.3 })
     expect(response.status).toBe(200)
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=cdsEntityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
 
     expect(response.status).toBe(200)
 
     expect(response.data.value).toMatchObject([
       {
-        cdsEntityName: "People",
-        changeLogAction: "Create",
+        entityName: "People",
+        action: "Create",
         Items: [
           {
             sequence: 0,
@@ -53,8 +53,8 @@ describe("Extension Fields Test Suite", () => {
         ],
       },
       {
-        cdsEntityName: "People",
-        changeLogAction: "Update",
+        entityName: "People",
+        action: "Update",
         Items: [
           {
             sequence: 0,

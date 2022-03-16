@@ -12,7 +12,9 @@
 - [x] all `Update/Delete` CQL (without `where`)
 - [x] aspect support
 - [ ] localization support
+- [ ] custom type (Integer) key support
 - [ ] multi primary key support
 - [x] extension field support
 - [ ] Samples
   - [ ] for fiori elements
+  - [ ] rows to columns table records
