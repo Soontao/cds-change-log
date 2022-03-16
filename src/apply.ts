@@ -95,7 +95,7 @@ export function applyChangeLog(cds: any) {
                 break;
               case "DELETE":
                 const deleteOriginalData: [] = await db.run(
-                  SELECT.from(entityName).where(query.DELETE.where)
+                  SELECT.from(entityName).columns(...keyNames, ...elementsKeys).where(query.DELETE.where)
                 );
                 changeLogs.push(...deleteOriginalData.map((original) => ({
                   cdsEntityName: entityDef.name,
@@ -114,7 +114,7 @@ export function applyChangeLog(cds: any) {
 
                 // query original values from database
                 const original: [] = await db.run(
-                  SELECT.from(entityName).where(query.UPDATE.where)
+                  SELECT.from(entityName).columns(...keyNames, ...elementsKeys).where(query.UPDATE.where)
                 );
 
                 changeLogs.push(
