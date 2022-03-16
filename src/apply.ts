@@ -23,7 +23,9 @@ export function extractKeyNamesFromEntity(entityDef: any) {
 }
 
 export function extractChangeAwareElements(entityDef: any): Array<string> {
-  return Object.entries(entityDef?.elements).filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true).map(([key]) => key)
+  return Object
+    .entries(entityDef?.elements)
+    .filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true).map(([key]) => key);
 }
 
 export function isChangeLogInternalEntity(name: string = "") {
@@ -60,9 +62,9 @@ export function applyChangeLog(cds: any) {
               return next();
             }
 
-            const elementsKeys = extractChangeAwareElements(entityDef)
+            const elementsKeys = extractChangeAwareElements(entityDef);
             if (elementsKeys.length === 0) {
-              return next()
+              return next();
             }
 
             const keyNames = extractKeyNamesFromEntity(entityDef);
@@ -71,11 +73,11 @@ export function applyChangeLog(cds: any) {
 
             switch (req.event) {
               case "CREATE":
-                let data = req.data
+                let data = req.data;
                 if (!(data instanceof Array)) {
-                  data = [data]
+                  data = [data];
                 }
-                
+
                 changeLogs.push(
                   ...data.map((entry: any) => ({
                     cdsEntityName: entityDef.name,
@@ -88,13 +90,13 @@ export function applyChangeLog(cds: any) {
                       attributeOldValue: null,
                     }))
                   }))
-                )
+                );
 
                 break;
               case "DELETE":
                 const deleteOriginalData: [] = await db.run(
                   SELECT.from(entityName).where(query.DELETE.where)
-                )
+                );
                 changeLogs.push(...deleteOriginalData.map((original) => ({
                   cdsEntityName: entityDef.name,
                   cdsEntityKey: original[keyNames[0]],
@@ -105,7 +107,7 @@ export function applyChangeLog(cds: any) {
                     attributeNewValue: null,
                     attributeOldValue: String(original[key]),
                   }))
-                })))
+                })));
 
                 break;
               case "UPDATE":
@@ -113,7 +115,7 @@ export function applyChangeLog(cds: any) {
                 // query original values from database
                 const original: [] = await db.run(
                   SELECT.from(entityName).where(query.UPDATE.where)
-                )
+                );
 
                 changeLogs.push(
                   ...original
@@ -144,7 +146,7 @@ export function applyChangeLog(cds: any) {
                   INSERT
                     .into(ENTITIES.CHANGELOG)
                     .entries(...changeLogs)
-                ).then(() => result))
+                ).then(() => result));
             }
             return next();
           });
