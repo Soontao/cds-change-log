@@ -127,6 +127,8 @@ entity Order : managed {
 };
 ```
 
+`extension.cds`
+
 ```groovy
 // remember using this file from your project root
 using {cap.community.common.ChangeLog} from 'cds-change-log';
@@ -135,7 +137,8 @@ extend ChangeLog with {
 
   // add a new column 'entityKeyInteger' for integer key
   @cds.changelog.extension.entityKey
-  @cds.changelog.extension.for.type : cds.Integer // this column will be used when entity use `Integer` as primary key
+  // this column will be used when entity use `Integer` as primary key
+  @cds.changelog.extension.for.type : cds.Integer  // MUST add the `cds.` prefix for built-in types
   entityKeyInteger : Integer;
   
 };
