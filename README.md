@@ -111,14 +111,26 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
 
 > if you want to use `Integer` or other cds built-in type as primary key
 
+`entity.cds`
+
+```groovy
+@cds.changelog.enabled
+entity Order : managed {
+  key ID     : Integer; // use Integer as key, not out-of-box UUID
+      @cds.changelog.enabled
+      Amount : Decimal;
+};
+```
+
 ```groovy
 // remember using this file from your project root
 using {cap.community.common.ChangeLog} from 'cds-change-log';
 
 extend ChangeLog with {
+  
   // add a new column 'entityKeyInteger' for integer key
   @cds.changelog.extension.entityKey
-  @cds.changelog.extension.for.type : cds.Integer
+  @cds.changelog.extension.for.type : cds.Integer // this column will be used when entity use `Integer` as primary key
   entityKeyInteger : Integer;
   
 };
