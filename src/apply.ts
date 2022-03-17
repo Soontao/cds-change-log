@@ -61,9 +61,13 @@ const buildChangeLog = (
   original?: any,
   change?: any
 ) => {
-
-  const changeLogKeyName = extension.findKeyByType(entityDef.elements[keyNames[0]].type) as string;
-  // TODO: throw error if not found the key
+  const keyName = keyNames[0];
+  const keyType = entityDef.elements[keyName].type;
+  const changeLogKeyName = extension.findKeyByType(keyType);
+  
+  if (changeLogKeyName === undefined) {
+    throw new TypeError(`${entityName}.${keyName} with type (${keyType}), which not have found a correct 'entityKey' element in 'ChangeLog' entity`);
+  }
 
   let action: string | undefined;
   if (original === undefined && change !== undefined) {

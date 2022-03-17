@@ -20,6 +20,19 @@ service SampleService {
   entity ChangeLogs      as projection on common.ChangeLog;
   entity Orders          as projection on Order;
 
+  @readonly
+  view PeopleWithChangeLog as
+    select from People
+    mixin {
+      changeLogs : Association to many common.ChangeLog
+                     on  People.ID             = changeLogs.entityKey
+                     and changeLogs.entityName = 'People'
+    }
+    into {
+      *,
+      changeLogs
+    };
+
   entity OtherEntity : cuid, managed {
     Name : String(255);
     Age  : Integer;

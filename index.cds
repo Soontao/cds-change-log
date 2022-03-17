@@ -21,7 +21,11 @@ type Action : String enum {
 
 
 entity ChangeLog : cuid, managed {
-  // it will be raw entity name, will not save projection/view data
+  /**
+   * root entity name, not view/projection
+   * 
+   * it will be raw entity name, will not save projection/view data
+   */
   entityName : CommonString not null;
 
   /**

@@ -41,7 +41,6 @@ describe("Basic Test Suite", () => {
 
     expect(response.data.value).toMatchObject([
       {
-        modifiedBy: "anonymous",
         entityName: "People",
         action: "Create",
         Items: [
@@ -131,6 +130,11 @@ describe("Basic Test Suite", () => {
         ],
       },
     ])
+  });
+
+  it('should support mixin', async () => {
+    const response = await axios.get(`/sample/PeopleWithChangeLog?$expand=changeLogs($expand=Items)`)
+    expect(response.status).toBe(200)
   });
 
 
