@@ -4,6 +4,9 @@
 
 [![node-test](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml/badge.svg)](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Soontao_cds-change-log&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Soontao_cds-change-log)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Soontao_cds-change-log&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Soontao_cds-change-log)
+
 ## Get Started
 
 `server.js`
