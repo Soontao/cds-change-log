@@ -12,6 +12,13 @@ entity People : cuid, managed, customManaged {
   Age  : Integer;
 }
 
+@cds.changelog.enabled
+entity Order : managed {
+  key ID     : Integer;
+      @cds.changelog.enabled
+      Amount : Decimal;
+};
+
 
 annotate People with @cds.changelog.enabled {
   Age  @cds.changelog.enabled;

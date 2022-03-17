@@ -1,6 +1,9 @@
 namespace test.app.srv.s1;
 
-using {People} from '../db';
+using {
+  People,
+  Order
+} from '../db';
 using {cap.community.common} from '../../../index.cds';
 
 
@@ -15,6 +18,7 @@ service SampleService {
   entity Peoples         as projection on People;
   entity ProjectedPeople as projection on People;
   entity ChangeLogs      as projection on common.ChangeLog;
+  entity Orders          as projection on Order;
 
   entity OtherEntity : cuid, managed {
     Name : String(255);

@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import { ACTIONS, ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./constants";
+import { ChangeLogExtensionContext } from "./extension";
 import { defaultStringOrNull } from "./utils";
 
 
@@ -44,7 +45,7 @@ export function extractEntityNameFromQuery(query: any): string {
  * 
  * @internal
  * @private
- * @param entityName entity name
+ * @param entityDef entity def
  * @param keyNames keys of entity
  * @param elementsKeys columns of entity
  * @param original original value in db, optional
@@ -52,9 +53,18 @@ export function extractEntityNameFromQuery(query: any): string {
  * @returns 
  */
 const buildChangeLog = (
+  entityDef: any,
   entityName: string,
   keyNames: Array<string>,
-  elementsKeys: Array<string>, original?: any, change?: any) => {
+  elementsKeys: Array<string>,
+  extension: ChangeLogExtensionContext,
+  original?: any,
+  change?: any
+) => {
+
+  const changeLogKeyName = extension.findKeyByType(entityDef.elements[keyNames[0]].type) as string;
+  // TODO: throw error if not found the key
+
   let action: string | undefined;
   if (original === undefined && change !== undefined) {
     action = ACTIONS.Create;
@@ -73,7 +83,7 @@ const buildChangeLog = (
 
   return {
     entityName,
-    entityKey: change?.[keyNames[0]] ?? original?.[keyNames[0]],
+    [changeLogKeyName]: change?.[keyNames[0]] ?? original?.[keyNames[0]],
     action,
     Items: elementsKeys
       .map(
@@ -120,6 +130,9 @@ export function applyChangeLog(cds: any) {
   cds.on("served", async () => {
     const db = await cds.connect.to("db");
     if (ENTITIES.CHANGELOG in cds?.model?.definitions) {
+      const modelChangeLog = cds.model.definitions[ENTITIES.CHANGELOG];
+      const extension = new ChangeLogExtensionContext(modelChangeLog);
+
       db.prepend((srv: any) => {
         srv.on(
           ["CREATE", "UPDATE", "DELETE"],
@@ -141,24 +154,26 @@ export function applyChangeLog(cds: any) {
               return next();
             }
 
+
             const keyNames = extractKeyNamesFromEntity(entityDef);
 
-            const changeLogs: any[] = [];
 
+            const changeLogs: any[] = [];
             const findQuery = SELECT.from(entityName).columns(...keyNames, ...elementsKeys);
             const where = query?.DELETE?.where ?? query?.UPDATE?.where;
+
             if (where !== undefined) { findQuery.where(where); }
 
             switch (req.event) {
               case "CREATE":
                 const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-                data.forEach(change => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, undefined, change)));
+                data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, keyNames, elementsKeys, extension, undefined, change)));
                 break;
               case "DELETE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original)));
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, keyNames, elementsKeys, extension, original)));
                 break;
               case "UPDATE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityName, keyNames, elementsKeys, original, req.data)));
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, keyNames, elementsKeys, extension, original, req.data)));
                 break;
               default:
                 break;

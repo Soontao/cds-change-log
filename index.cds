@@ -22,26 +22,23 @@ type Action : String enum {
 
 entity ChangeLog : cuid, managed {
   // it will be raw entity name, will not save projection/view data
-  entityName       : CommonString not null;
+  entityName : CommonString not null;
 
-  @cds.changelog.storage.key     : {
-    default : true,
-    for     : {type : UUID}
-  }
-  // the mandatory key of reference key
-  entityKey        : UUID;
-
-  @cds.changelog.storage.key.for : {type : Integer}
-  entityKeyInteger : Integer;
+  /**
+   * default key storage for common model
+   */
+  @cds.changelog.extension.entityKey
+  @cds.changelog.extension.for.type : cds.UUID
+  entityKey  : UUID;
   /**
    * changed action
    */
-  action           : Action not null;
+  action     : Action not null;
   /**
    * detail of changed value
    */
-  Items            : Composition of many ChangeLog.Item
-                       on Items.Parent = $self;
+  Items      : Composition of many ChangeLog.Item
+                 on Items.Parent = $self;
 }
 
 entity ChangeLog.Item { // do not need the user info because header level has that
