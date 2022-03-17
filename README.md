@@ -127,7 +127,7 @@ entity Order : managed {
 using {cap.community.common.ChangeLog} from 'cds-change-log';
 
 extend ChangeLog with {
-  
+
   // add a new column 'entityKeyInteger' for integer key
   @cds.changelog.extension.entityKey
   @cds.changelog.extension.for.type : cds.Integer // this column will be used when entity use `Integer` as primary key
@@ -176,3 +176,6 @@ service SampleService {
 - [ ] Samples
   - [ ] for fiori elements
   - [ ] rows to columns table records
+
+
+## [LICENSE](./LICENSE)
