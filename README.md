@@ -3,6 +3,7 @@
 > provide the `ChangeLog` best practice for SAP CAP nodejs runtime
 
 [![node-test](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml/badge.svg)](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml)
+[![npm](https://img.shields.io/npm/v/cds-change-log)](https://www.npmjs.com/package/cds-change-log)
 
 [![codecov](https://codecov.io/gh/Soontao/cds-change-log/branch/main/graph/badge.svg?token=kKkSYJyTfG)](https://codecov.io/gh/Soontao/cds-change-log)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Soontao_cds-change-log&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Soontao_cds-change-log)
@@ -187,5 +188,6 @@ service SampleService {
   - [ ] for fiori elements
   - [ ] rows to columns table records
 
+## [CHANGELOG](./CHANGELOG.md)
 
 ## [LICENSE](./LICENSE)
