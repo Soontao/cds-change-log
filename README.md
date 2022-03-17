@@ -4,7 +4,6 @@
 
 [![node-test](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml/badge.svg)](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml)
 
-
 ## Get Started
 
 `server.js`
@@ -17,6 +16,9 @@ module.exports = cds.server
 ```
 
 `entity.cds`
+
+- MUST annotating at both entity and field/element level
+- MUST annotating at the root/raw `entity` level, annotations on `projection`/`view` will not work
 
 ```groovy
 entity People : cuid, managed {
