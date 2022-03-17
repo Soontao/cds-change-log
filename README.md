@@ -4,8 +4,10 @@
 
 [![node-test](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml/badge.svg)](https://github.com/Soontao/cds-change-log/actions/workflows/nodejs.yml)
 
+[![codecov](https://codecov.io/gh/Soontao/cds-change-log/branch/main/graph/badge.svg?token=kKkSYJyTfG)](https://codecov.io/gh/Soontao/cds-change-log)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Soontao_cds-change-log&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Soontao_cds-change-log)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Soontao_cds-change-log&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Soontao_cds-change-log)
+[![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/Soontao/cds-change-log)](https://libraries.io/github/Soontao/cds-change-log)
 
 ## Get Started
 
