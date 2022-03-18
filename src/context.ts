@@ -4,9 +4,9 @@ import { extractKeyNamesFromEntity } from "./entity";
 export type KeyMapping = Array<[changeLogElementKey: string, targetEntityKey: string]>;
 
 /**
- * change log extension context
+ * change log context
  */
-export class ChangeLogExtensionContext {
+export class ChangeLogContext {
   /**
    * change log model definition
    */
