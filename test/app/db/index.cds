@@ -37,3 +37,10 @@ entity PeopleOrderForProduct {
       @cds.changelog.enabled
       Amount   : Decimal;
 }
+
+@cds.changelog.enabled
+entity Order3 {
+  key ID     : Decimal;
+      @cds.changelog.enabled
+      Amount : Decimal;
+}

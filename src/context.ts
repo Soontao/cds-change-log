@@ -1,5 +1,7 @@
-import { ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET } from "./constants";
+/* eslint-disable max-len */
+import { ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET, ENTITIES } from "./constants";
 import { extractKeyNamesFromEntity } from "./entity";
+import { ChangeLogError } from "./error";
 
 export type KeyMapping = Array<[changeLogElementKey: string, targetEntityKey: string]>;
 
@@ -39,10 +41,10 @@ export class ChangeLogContext {
       const changelogElementName = targetEntityElement[ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET];
       const changeLogElement = this.#changeLogDef.elements[changelogElementName];
       if (changeLogElement === undefined) {
-        // TODO: throw error not found target
+        throw new ChangeLogError(`can not found element '${changelogElementName}' on entity '${ENTITIES.CHANGELOG}'`);
       }
       if (targetEntityElement.type !== changeLogElement.type) {
-        // TODO: throw error
+        throw new ChangeLogError(`element '${changelogElementName}' type should be '${targetEntityElement.type}'`);
       }
       return changelogElementName;
     }
@@ -63,7 +65,7 @@ export class ChangeLogContext {
         const targetEntityElementDef = targetEntityDef.elements[targetEntityKeyName];
         const changeLogEntityKeyName = this.findKeyName(targetEntityElementDef);
         if (changeLogEntityKeyName === undefined) {
-          // TODO: throw error
+          throw new ChangeLogError(`not found proper column to store value of '${targetEntityDef.name}'.'${targetEntityKeyName}'`);
         }
         mapping.push([changeLogEntityKeyName, targetEntityKeyName]);
       }

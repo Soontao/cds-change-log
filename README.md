@@ -208,6 +208,7 @@ service SampleService {
 - [x] extension field support
 - [ ] validation at startup
 - [ ] secondary storage like mongo/s3
+- [ ] association support
 - [ ] Samples
   - [ ] for fiori elements
   - [ ] rows to columns table records

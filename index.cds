@@ -19,6 +19,9 @@ type Action : String enum {
   Delete;
 };
 
+/**
+ * change log table, used to store change log data
+ */
 @cds.autoexpose
 entity ChangeLog : cuid, managed {
   /**

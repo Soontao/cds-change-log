@@ -3,13 +3,14 @@ import { buildChangeLog } from "./changeLog";
 import { ENTITIES } from "./constants";
 import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements, extractKeyNamesFromEntity, isChangeLogEnabled, isChangeLogInternalEntity } from "./entity";
+import { ChangeLogError } from "./error";
 import { extractEntityNameFromQuery } from "./query";
 
 
 export function createChangeLogHandler(cds: any, db: any) {
   const { INSERT, SELECT } = cds.ql;
   const context = new ChangeLogContext(cds.model.definitions[ENTITIES.CHANGELOG]);
-  
+
   return async function changeLogHandler(req: any, next: () => Promise<any>) {
     const { query } = req;
 
@@ -25,8 +26,10 @@ export function createChangeLogHandler(cds: any, db: any) {
 
     const elementsKeys = extractChangeAwareElements(entityDef);
 
-    // TODO: check the target entity must have at least one key
     const entityPrimaryKeys = extractKeyNamesFromEntity(entityDef);
+    if (entityPrimaryKeys.length === 0) {
+      throw new ChangeLogError(`entity '${entityName}' must have at least one primary key for change log`);
+    }
 
     const changeLogs: any[] = [];
     // query for UPDATE/DELETE
