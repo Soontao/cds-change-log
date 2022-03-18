@@ -24,8 +24,9 @@ module.exports = cds.server
 
 `entity.cds`
 
-- MUST annotating at both entity and field/element level
-- MUST annotating at the root/raw `entity` level, annotations on `projection`/`view` will not work
+- **MUST** annotating at both entity and field/element level
+- **MUST** annotating at the root/raw `entity` level, annotations on `projection`/`view` will not work
+- **MUST** have at least one PRIMARY KEY
 
 ```groovy
 entity People : cuid, managed {
