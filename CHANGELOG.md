@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/Soontao/cds-change-log/compare/v0.0.3...v0.0.4) (2022-03-18)
+
+
+### Features
+
+* ignore association & composition now ([a727cde](https://github.com/Soontao/cds-change-log/commit/a727cdef0b604f39f8f605ae15762d5ab103e81d))
+* more exceptional case test ([c60daf6](https://github.com/Soontao/cds-change-log/commit/c60daf644ec780c2ef78c2390038305821fe7af8))
+
 ### [0.0.3](https://github.com/Soontao/cds-change-log/compare/v0.0.2...v0.0.3) (2022-03-18)
 
 
