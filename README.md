@@ -40,7 +40,7 @@ annotate People with @cds.changelog.enabled {
 };
 ```
 
-`create and update`
+`create and update objects`
 
 ```js
 let response = await axios.post("/sample/Peoples", { Name: "Theo Sun 2", Age: 39 })
@@ -51,7 +51,7 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
 `generated change logs`
 
 <details>
-  <summary>Click to expand!</summary>
+  <summary>Click to expand sample logs</summary>
   
 ```js
 [
@@ -123,7 +123,7 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
 
 ```groovy
 @cds.changelog.enabled
-entity Order : managed {
+entity Order : managed { // a sample entity
   key ID     : Integer; // use Integer as key, not out-of-box UUID
       @cds.changelog.enabled
       Amount : Decimal;
