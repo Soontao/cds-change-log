@@ -32,7 +32,18 @@ export function createChangeLogHandler(cds: any, db: any) {
       throw new ChangeLogError(`entity '${entityName}' must have at least one primary key for change log`);
     }
 
-    const changeLogs: any[] = [];
+    let changeLogs: any[] = [];
+
+    const insertions: Array<Promise<void>> = [];
+
+    const saveChangeLog = (log: any) => {
+      changeLogs.push(log);
+      if (changeLogs.length > 100) {
+        insertions.push(db.run(INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogs)).then(() => undefined));
+        changeLogs = [];
+      }
+    };
+
 
     // query for UPDATE/DELETE
     const originalDataQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...targetEntityElements.map(ele => ele.name));
@@ -45,26 +56,26 @@ export function createChangeLogHandler(cds: any, db: any) {
     switch (req.event) {
       case "CREATE":
         const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-        data.forEach(change => changeLogs.push(buildChangeLog(entityDef, context, undefined, change)));
+        data.forEach(change => saveChangeLog(buildChangeLog(entityDef, context, undefined, change)));
         break;
       case "DELETE":
-        await db.foreach(originalDataQuery, (original: any) => {
-          changeLogs.push(buildChangeLog(entityDef, context, original));
-        });
+        await db.foreach(originalDataQuery, (original: any) => saveChangeLog(buildChangeLog(entityDef, context, original)));
         break;
       case "UPDATE":
-        await db.foreach(originalDataQuery, (original: any) => {
-          changeLogs.push(buildChangeLog(entityDef, context, original, req.data));
-        });
+        await db.foreach(originalDataQuery, (original: any) => saveChangeLog(buildChangeLog(entityDef, context, original, req.data)));
         break;
       default:
         break;
     }
 
     if (changeLogs.length > 0) {
-      const insertions = INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogs);
-      return next().then((result) => db.run(insertions).then(() => result));
+      insertions.push(INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogs));
     }
+
+    if (insertions.length > 0) {
+      await Promise.all(insertions);
+    }
+
     return next();
   };
 }

@@ -70,6 +70,13 @@ describe("Multi Change Test Suite", () => {
     expect(result?.total ?? result?.TOTAL).toBe(0)
   });
 
+  it('should support insert hugh volume (1000) entries', async () => {
+
+    await cds.run(INSERT.into("People").entries(Array(1000).fill(0).map((_, idx) => ({ Name: `Person_Hugh_${idx}`, Age: idx }))))
+
+  });
+
+
   it('should support multi keys', async () => {
 
     const OrderID = 99;
