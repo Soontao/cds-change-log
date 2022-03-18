@@ -28,6 +28,11 @@ const buildChangeLog = (
   change?: any
 ) => {
 
+  if (original === undefined && change === undefined) {
+    throw new TypeError("require original data or change data at least");
+  }
+
+  // determine action by inbound changed value and original database value
   let action: string | undefined;
   if (original === undefined && change !== undefined) {
     action = ACTIONS.Create;
@@ -37,11 +42,6 @@ const buildChangeLog = (
   }
   if (original !== undefined && change !== undefined) {
     action = ACTIONS.Update;
-  }
-
-
-  if (action === undefined) {
-    throw new TypeError("require original data or change data at least");
   }
 
   // support multi keys
@@ -93,7 +93,9 @@ const buildChangeLog = (
 };
 
 /**
- * apply change log 
+ * apply change log to CAP nodejs runtime
+ * 
+ * just simply use the `@cds.changelog.enabled` on entity and elements to record the changed values to database
  * 
  * @param cds cds facade
  */
@@ -101,6 +103,7 @@ export function applyChangeLog(cds: any) {
   const { INSERT, SELECT } = cds.ql;
   cds.on("served", async () => {
     const db = await cds.connect.to("db");
+
     if (ENTITIES.CHANGELOG in cds?.model?.definitions) {
       const modelChangeLog = cds.model.definitions[ENTITIES.CHANGELOG];
       const extension = new ChangeLogExtensionContext(modelChangeLog);
@@ -130,10 +133,12 @@ export function applyChangeLog(cds: any) {
             const entityPrimaryKeys = extractKeyNamesFromEntity(entityDef);
 
             const changeLogs: any[] = [];
-            const findQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...elementsKeys);
+            // query for UPDATE/DELETE
+            const originalDataQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...elementsKeys);
             const where = query?.DELETE?.where ?? query?.UPDATE?.where;
 
-            if (where !== undefined) { findQuery.where(where); }
+            // if there have `where` condition on inbound query, copy it to original data query
+            if (where !== undefined) { originalDataQuery.where(where); }
 
             switch (req.event) {
               case "CREATE":
@@ -141,22 +146,18 @@ export function applyChangeLog(cds: any) {
                 data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, undefined, change)));
                 break;
               case "DELETE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, original)));
+                await db.foreach(originalDataQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, original)));
                 break;
               case "UPDATE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, original, req.data)));
+                await db.foreach(originalDataQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, original, req.data)));
                 break;
               default:
                 break;
             }
 
             if (changeLogs.length > 0) {
-              return next()
-                .then((result) => db.run(
-                  INSERT
-                    .into(ENTITIES.CHANGELOG)
-                    .entries(...changeLogs)
-                ).then(() => result));
+              const insertions = INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogs);
+              return next().then((result) => db.run(insertions).then(() => result));
             }
             return next();
           });
