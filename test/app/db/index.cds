@@ -51,6 +51,7 @@ entity Order4 : cuid {
   Items  : Association to many Order4Item
              on Items.order = $self;
 
+  name   : localized String(255);
   Items2 : Composition of many {
              Value : Integer;
            }

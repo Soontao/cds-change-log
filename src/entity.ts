@@ -34,7 +34,11 @@ const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
 export function extractChangeAwareElements(entityDef: any): Array<string> {
   return Object
     .entries(entityDef?.elements)
-    .filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true && !IGNORED_TYPES.includes((value as any).type))
+    .filter((entry: any[]) =>
+      entry[1]?.[ANNOTATE_CHANGELOG_ENABLED] === true &&
+      entry[1]?.localized !== true &&
+      !IGNORED_TYPES.includes(entry[1].type)
+    )
     .map(([key]) => key);
 }
 
