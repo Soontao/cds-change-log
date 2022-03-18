@@ -203,9 +203,11 @@ service SampleService {
 - [x] aspect support
 - [ ] localization support
 - [x] custom type (e.g. Integer) key support
-  - [ ] cache
+  - [x] metadata cache
 - [x] multi primary key support
 - [x] extension field support
+- [ ] validation at startup
+- [ ] secondary storage like mongo/s3
 - [ ] Samples
   - [ ] for fiori elements
   - [ ] rows to columns table records
