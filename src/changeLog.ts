@@ -90,6 +90,7 @@ export const buildChangeLog = (
       return item;
     });
 
+  // TODO: copy createdAt/modifiedAt from target entity
   return {
     ...keys,
     entityName,
