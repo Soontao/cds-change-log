@@ -64,7 +64,7 @@ const buildChangeLog = (
   const keyName = keyNames[0];
   const keyType = entityDef.elements[keyName].type;
   const changeLogKeyName = extension.findKeyByType(keyType);
-  
+
   if (changeLogKeyName === undefined) {
     throw new TypeError(`${entityName}.${keyName} with type (${keyType}), which not have found a correct 'entityKey' element in 'ChangeLog' entity`);
   }
@@ -144,7 +144,7 @@ export function applyChangeLog(cds: any) {
             const { query } = req;
 
             const entityName = extractEntityNameFromQuery(query);
-            if (entityName === undefined && isChangeLogInternalEntity(entityName)) {
+            if (entityName === undefined || isChangeLogInternalEntity(entityName)) {
               return next();
             }
 
@@ -158,12 +158,10 @@ export function applyChangeLog(cds: any) {
               return next();
             }
 
-
-            const keyNames = extractKeyNamesFromEntity(entityDef);
-
+            const entityPrimaryKeys = extractKeyNamesFromEntity(entityDef);
 
             const changeLogs: any[] = [];
-            const findQuery = SELECT.from(entityName).columns(...keyNames, ...elementsKeys);
+            const findQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...elementsKeys);
             const where = query?.DELETE?.where ?? query?.UPDATE?.where;
 
             if (where !== undefined) { findQuery.where(where); }
@@ -171,13 +169,13 @@ export function applyChangeLog(cds: any) {
             switch (req.event) {
               case "CREATE":
                 const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-                data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, keyNames, elementsKeys, extension, undefined, change)));
+                data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, entityPrimaryKeys, elementsKeys, extension, undefined, change)));
                 break;
               case "DELETE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, keyNames, elementsKeys, extension, original)));
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, entityPrimaryKeys, elementsKeys, extension, original)));
                 break;
               case "UPDATE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, keyNames, elementsKeys, extension, original, req.data)));
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, entityPrimaryKeys, elementsKeys, extension, original, req.data)));
                 break;
               default:
                 break;

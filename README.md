@@ -182,6 +182,7 @@ service SampleService {
 - [x] aspect support
 - [ ] localization support
 - [x] custom type (e.g. Integer) key support
+  - [ ] cache
 - [ ] multi primary key support
 - [x] extension field support
 - [ ] Samples
