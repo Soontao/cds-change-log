@@ -148,6 +148,27 @@ extend ChangeLog with {
 
 ```
 
+### Multi Primary Keys on target entity
+
+> if you want to **manually** specify the data storage for entity keys
+
+`entity.cds`
+
+```groovy
+@cds.changelog.enabled
+entity PeopleOrderForProduct {
+      // store key to ChangeLog.entityKeyInteger
+      @cds.changelog.extension.key.target : 'entityKeyInteger'
+  key OrderID  : Integer;
+      // store key to ChangeLog.entityKey
+      @cds.changelog.extension.key.target : 'entityKey'
+  key PeopleID : UUID;
+      @cds.changelog.enabled
+      Amount   : Decimal;
+}
+```
+
+
 ### Mixin
 
 > support associate to `ChangeLogs` in root entity
@@ -183,7 +204,7 @@ service SampleService {
 - [ ] localization support
 - [x] custom type (e.g. Integer) key support
   - [ ] cache
-- [ ] multi primary key support
+- [x] multi primary key support
 - [x] extension field support
 - [ ] Samples
   - [ ] for fiori elements

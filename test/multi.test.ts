@@ -70,6 +70,55 @@ describe("Multi Change Test Suite", () => {
     expect(result?.total ?? result?.TOTAL).toBe(0)
   });
 
+  it('should support multi keys', async () => {
+
+    const OrderID = 99;
+    const PeopleID = '2e77d3bb-9023-475c-95f6-9796b99ff9ff'
+    let response = await axios.post("/sample/PeopleOrderForProducts", { OrderID, PeopleID, Amount: 2.33 })
+    expect(response.status).toBe(201)
+
+    response = await axios.patch(`/sample/PeopleOrderForProducts(OrderID=${OrderID},PeopleID=${PeopleID})`, { Amount: 8.88 })
+    expect(response.status).toBe(200)
+
+    const changeLogs = await cds.run(
+      SELECT
+        .from(ENTITIES.CHANGELOG, (c: any) => { c("*"), c.Items('*') })
+        .where({ entityKey: PeopleID, entityKeyInteger: OrderID })
+    )
+    expect(changeLogs).toHaveLength(2)
+    expect(changeLogs).toMatchObject([
+      {
+        entityName: "PeopleOrderForProduct",
+        entityKey: "2e77d3bb-9023-475c-95f6-9796b99ff9ff",
+        action: "Create",
+        entityKeyInteger: 99,
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Amount",
+            attributeNewValue: "2.33",
+            attributeOldValue: null,
+          },
+        ],
+      },
+      {
+        entityName: "PeopleOrderForProduct",
+        entityKey: "2e77d3bb-9023-475c-95f6-9796b99ff9ff",
+        action: "Update",
+        entityKeyInteger: 99,
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Amount",
+            attributeNewValue: "8.88",
+            attributeOldValue: "2.33",
+          },
+        ],
+      },
+    ])
+
+  });
+
 
 
 

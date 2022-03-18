@@ -2,7 +2,8 @@ namespace test.app.srv.s1;
 
 using {
   People,
-  Order
+  Order,
+  PeopleOrderForProduct
 } from '../db';
 using {cap.community.common} from '../../../index.cds';
 
@@ -15,10 +16,11 @@ using {
 @path : '/sample'
 service SampleService {
 
-  entity Peoples         as projection on People;
-  entity ProjectedPeople as projection on People;
-  entity ChangeLogs      as projection on common.ChangeLog;
-  entity Orders          as projection on Order;
+  entity Peoples                as projection on People;
+  entity ProjectedPeople        as projection on People;
+  entity ChangeLogs             as projection on common.ChangeLog;
+  entity Orders                 as projection on Order;
+  entity PeopleOrderForProducts as projection on PeopleOrderForProduct;
 
   @readonly
   view PeopleWithChangeLog as

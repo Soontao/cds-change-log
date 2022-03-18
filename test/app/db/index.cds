@@ -35,5 +35,5 @@ entity PeopleOrderForProduct {
       @cds.changelog.extension.key.target : 'entityKey'
   key PeopleID : UUID;
       @cds.changelog.enabled
-      Amount   : String(50);
+      Amount   : Decimal;
 }

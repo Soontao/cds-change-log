@@ -1,43 +1,10 @@
 /* eslint-disable max-len */
-import { ACTIONS, ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE, ENTITIES } from "./constants";
+import { ACTIONS, ENTITIES } from "./constants";
+import { extractChangeAwareElements, extractKeyNamesFromEntity, isChangeLogEnabled, isChangeLogInternalEntity } from "./entity";
 import { ChangeLogExtensionContext } from "./extension";
+import { extractEntityNameFromQuery } from "./query";
 import { defaultStringOrNull } from "./utils";
 
-
-export function isChangeLogEnabled(def: any) {
-  if (def !== undefined) {
-    return ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true;
-  }
-  return false;
-}
-
-/**
- * extract key names from entity definition
- * 
- * @param entityDef 
- * @returns 
- */
-export function extractKeyNamesFromEntity(entityDef: any) {
-  // TODO: concern about multi key in single entity
-  return Object
-    .entries(entityDef?.elements ?? [])
-    .filter(([_, value]) => (value as any)?.key)
-    .map(([key, _]) => key);
-}
-
-export function extractChangeAwareElements(entityDef: any): Array<string> {
-  return Object
-    .entries(entityDef?.elements)
-    .filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true).map(([key]) => key);
-}
-
-export function isChangeLogInternalEntity(name: string = "") {
-  return name.startsWith(CHANGELOG_NAMESPACE);
-}
-
-export function extractEntityNameFromQuery(query: any): string {
-  return query?.INSERT?.into ?? query?.UPDATE?.entity ?? query?.DELETE?.from;
-}
 
 
 /**
@@ -55,21 +22,11 @@ export function extractEntityNameFromQuery(query: any): string {
 const buildChangeLog = (
   entityDef: any,
   entityName: string,
-  keyNames: Array<string>,
   elementsKeys: Array<string>,
   extension: ChangeLogExtensionContext,
   original?: any,
   change?: any
 ) => {
-  const keyName = keyNames[0];
-  const keyType = entityDef.elements[keyName].type;
-  
-  // TODO: check key type is match between change and the field of 'ChangeLog' entity
-  const changeLogKeyName = extension.findKeyByType(keyType);
-
-  if (changeLogKeyName === undefined) {
-    throw new TypeError(`${entityName}.${keyName} with type (${keyType}), which not have found a correct 'entityKey' element in 'ChangeLog' entity`);
-  }
 
   let action: string | undefined;
   if (original === undefined && change !== undefined) {
@@ -87,9 +44,18 @@ const buildChangeLog = (
     throw new TypeError("require original data or change data at least");
   }
 
+  // support multi keys
+  const keys = extension
+    .extractKeyMappingFromEntity(entityDef)
+    .reduce((pre: any, cur) => {
+      const [changeLogKeyName, targetEntityKeyName] = cur;
+      pre[changeLogKeyName] = change?.[targetEntityKeyName] ?? original?.[targetEntityKeyName];
+      return pre;
+    }, {});
+
   return {
+    ...keys,
     entityName,
-    [changeLogKeyName]: change?.[keyNames[0]] ?? original?.[keyNames[0]],
     action,
     Items: elementsKeys
       .map(
@@ -160,6 +126,7 @@ export function applyChangeLog(cds: any) {
               return next();
             }
 
+            // TODO: check the target entity must have at least one key
             const entityPrimaryKeys = extractKeyNamesFromEntity(entityDef);
 
             const changeLogs: any[] = [];
@@ -171,13 +138,13 @@ export function applyChangeLog(cds: any) {
             switch (req.event) {
               case "CREATE":
                 const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-                data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, entityPrimaryKeys, elementsKeys, extension, undefined, change)));
+                data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, undefined, change)));
                 break;
               case "DELETE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, entityPrimaryKeys, elementsKeys, extension, original)));
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, original)));
                 break;
               case "UPDATE":
-                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, entityPrimaryKeys, elementsKeys, extension, original, req.data)));
+                await db.foreach(findQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, extension, original, req.data)));
                 break;
               default:
                 break;
