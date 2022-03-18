@@ -63,6 +63,8 @@ const buildChangeLog = (
 ) => {
   const keyName = keyNames[0];
   const keyType = entityDef.elements[keyName].type;
+  
+  // TODO: check key type is match between change and the field of 'ChangeLog' entity
   const changeLogKeyName = extension.findKeyByType(keyType);
 
   if (changeLogKeyName === undefined) {

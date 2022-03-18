@@ -2,7 +2,7 @@ namespace cap.community.common;
 
 using {
   cuid,
-  managed
+  managed,
 } from '@sap/cds/common';
 
 /**
@@ -19,12 +19,13 @@ type Action : String enum {
   Delete;
 };
 
-
+@cds.autoexpose
 entity ChangeLog : cuid, managed {
   /**
    * root entity name, not view/projection
-   * 
-   * it will be raw entity name, will not save projection/view data
+   *
+   * it will be raw entity name, will not save projection/view
+   * data
    */
   entityName : CommonString not null;
 
