@@ -4,7 +4,8 @@ using {
   People,
   Order,
   PeopleOrderForProduct,
-  Order3
+  Order3,
+  Book
 } from '../db';
 using {cap.community.common} from '../../../index.cds';
 
@@ -23,6 +24,7 @@ service SampleService {
   entity Orders                 as projection on Order;
   entity Orders3                as projection on Order3;
   entity PeopleOrderForProducts as projection on PeopleOrderForProduct;
+  entity Books                  as projection on Book;
 
   @readonly
   view PeopleWithChangeLog as

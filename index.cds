@@ -39,6 +39,10 @@ entity ChangeLog : cuid, managed {
   @cds.changelog.extension.for.type : cds.UUID
   entityKey  : UUID;
   /**
+   * locale
+   */
+  locale     : String(14);
+  /**
    * changed action
    */
   action     : Action not null;

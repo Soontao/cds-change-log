@@ -1,6 +1,8 @@
+/* eslint-disable max-len */
 import { ACTIONS } from "./constants";
 import { ChangeLogContext } from "./context";
-import { defaultStringOrNull } from "./utils";
+import { extractChangeAwareElements, extractChangeAwareLocalizedElements } from "./entity";
+import { cwdRequire, defaultStringOrNull } from "./utils";
 
 
 /**
@@ -10,23 +12,26 @@ import { defaultStringOrNull } from "./utils";
  * @private
  * @param entityDef entity def
  * @param keyNames keys of entity
- * @param elementsKeys columns of entity
+ * @param entityElements columns of entity
  * @param original original value in db, optional
  * @param change change value from requests, optional
  * @returns 
  */
 export const buildChangeLog = (
   entityDef: any,
-  entityName: string,
-  elementsKeys: Array<string>,
   context: ChangeLogContext,
   original?: any,
-  change?: any
+  change?: any,
 ) => {
 
   if (original === undefined && change === undefined) {
     throw new TypeError("require original data or change data at least");
   }
+  const entityName = entityDef.name;
+  const entityElements = extractChangeAwareElements(entityDef);
+  const localizedElements = extractChangeAwareLocalizedElements(entityDef);
+
+  const cds = cwdRequire("@sap/cds");
 
   // determine action by inbound changed value and original database value
   let action: string | undefined;
@@ -49,42 +54,48 @@ export const buildChangeLog = (
       return pre;
     }, {});
 
+  const Items = [...entityElements, ...localizedElements]
+    .filter(ele => action === ACTIONS.Update ? ele.name in change : true) // for update, if not put into payload, no update
+    .map(
+      (ele) => {
+        const key = ele.name;
+
+        let attributeNewValue = null;
+        let attributeOldValue = null;
+        switch (action) {
+          case ACTIONS.Create:
+            attributeNewValue = defaultStringOrNull(change[key]);
+            break;
+          case ACTIONS.Delete:
+            attributeOldValue = defaultStringOrNull(original?.[key]);
+            break;
+          case ACTIONS.Update:
+            attributeNewValue = defaultStringOrNull(change[key]);
+            attributeOldValue = defaultStringOrNull(original?.[key]);
+          default:
+            break;
+        }
+
+        return {
+          sequence: 0,
+          attributeKey: key,
+          attributeNewValue,
+          attributeOldValue,
+        };
+      }
+    )
+    .filter(item => item.attributeNewValue !== item.attributeOldValue)
+    .map((item, idx) => {
+      item.sequence = idx;
+      return item;
+    });
+
   return {
     ...keys,
     entityName,
+    locale: cds.context.locale,
     action,
-    Items: elementsKeys
-      .map(
-        (key) => {
-          let attributeNewValue = null;
-          let attributeOldValue = null;
-          switch (action) {
-            case ACTIONS.Create:
-              attributeNewValue = defaultStringOrNull(change[key]);
-              break;
-            case ACTIONS.Delete:
-              attributeOldValue = defaultStringOrNull(original[key]);
-              break;
-            case ACTIONS.Update:
-              attributeNewValue = defaultStringOrNull(change[key]);
-              attributeOldValue = defaultStringOrNull(original[key]);
-            default:
-              break;
-          }
-
-          return {
-            sequence: 0,
-            attributeKey: key,
-            attributeNewValue,
-            attributeOldValue,
-          };
-        }
-      )
-      .filter(item => item.attributeNewValue !== item.attributeOldValue)
-      .map((item, idx) => {
-        item.sequence = idx;
-        return item;
-      })
+    Items
   };
 };
 

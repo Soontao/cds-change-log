@@ -24,16 +24,19 @@ export function createChangeLogHandler(cds: any, db: any) {
       return next();
     }
 
-    const elementsKeys = extractChangeAwareElements(entityDef);
+    const targetEntityElements = extractChangeAwareElements(entityDef);
 
     const entityPrimaryKeys = extractKeyNamesFromEntity(entityDef);
+
     if (entityPrimaryKeys.length === 0) {
       throw new ChangeLogError(`entity '${entityName}' must have at least one primary key for change log`);
     }
 
     const changeLogs: any[] = [];
+
     // query for UPDATE/DELETE
-    const originalDataQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...elementsKeys);
+    const originalDataQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...targetEntityElements.map(ele => ele.name));
+
     const where = query?.DELETE?.where ?? query?.UPDATE?.where;
 
     // if there have `where` condition on inbound query, copy it to original data query
@@ -42,13 +45,17 @@ export function createChangeLogHandler(cds: any, db: any) {
     switch (req.event) {
       case "CREATE":
         const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-        data.forEach(change => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, context, undefined, change)));
+        data.forEach(change => changeLogs.push(buildChangeLog(entityDef, context, undefined, change)));
         break;
       case "DELETE":
-        await db.foreach(originalDataQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, context, original)));
+        await db.foreach(originalDataQuery, (original: any) => {
+          changeLogs.push(buildChangeLog(entityDef, context, original));
+        });
         break;
       case "UPDATE":
-        await db.foreach(originalDataQuery, (original: any) => changeLogs.push(buildChangeLog(entityDef, entityName, elementsKeys, context, original, req.data)));
+        await db.foreach(originalDataQuery, (original: any) => {
+          changeLogs.push(buildChangeLog(entityDef, context, original, req.data));
+        });
         break;
       default:
         break;

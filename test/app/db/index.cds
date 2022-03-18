@@ -57,6 +57,16 @@ entity Order4 : cuid {
            }
 }
 
+@cds.changelog.enabled
+entity Book : cuid {
+
+  @cds.changelog.enabled
+  Name  : localized String(255);
+  @cds.changelog.enabled
+  Price : Decimal;
+  
+}
+
 
 @cds.changelog.enabled
 entity Order4Item : cuid {

@@ -15,10 +15,7 @@ export function isChangeLogEnabled(def: any) {
  * @returns 
  */
 export function extractKeyNamesFromEntity(entityDef: any) {
-  return Object
-    .entries(entityDef?.elements ?? [])
-    .filter(([_, value]) => (value as any)?.key)
-    .map(([key, _]) => key);
+  return extractKeyElementsFromEntity(entityDef).map((ele: any) => ele.name);
 }
 
 export function extractKeyElementsFromEntity(entityDef: any) {
@@ -30,16 +27,31 @@ export function extractKeyElementsFromEntity(entityDef: any) {
 
 const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
 
+export function isLocalizedAndChangeLogRelated(entityDef: any): boolean {
+  return extractChangeAwareLocalizedElements(entityDef).length > 0;
+}
 
-export function extractChangeAwareElements(entityDef: any): Array<string> {
+export function extractChangeAwareLocalizedElements(entityDef: any): Array<any> {
   return Object
     .entries(entityDef?.elements)
     .filter((entry: any[]) =>
       entry[1]?.[ANNOTATE_CHANGELOG_ENABLED] === true &&
+      entry[1]?.localized === true &&
+      !IGNORED_TYPES.includes(entry[1].type)
+    )
+    .map(entry => entry[1]);
+}
+
+export function extractChangeAwareElements(entityDef: any): Array<any> {
+  return Object
+    .entries(entityDef?.elements)
+    .filter((entry: any[]) =>
+      entry[1]?.[ANNOTATE_CHANGELOG_ENABLED] === true &&
+      entry[1]?.key !== true && // ignore key
       entry[1]?.localized !== true &&
       !IGNORED_TYPES.includes(entry[1].type)
     )
-    .map(([key]) => key);
+    .map(entry => entry[1]);
 }
 
 export function isChangeLogInternalEntity(name: string = "") {

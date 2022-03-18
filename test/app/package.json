@@ -1,0 +1,12 @@
+{
+  "name": "test-app",
+  "cds": {
+    "i18n": {
+      "for_sql": [
+        "en",
+        "de",
+        "zh_CN"
+      ]
+    }
+  }
+}
