@@ -44,3 +44,23 @@ entity Order3 {
       @cds.changelog.enabled
       Amount : Decimal;
 }
+
+@cds.changelog.enabled
+entity Order4 : cuid {
+  @cds.changelog.enabled
+  Items  : Association to many Order4Item
+             on Items.order = $self;
+
+  Items2 : Composition of many {
+             Value : Integer;
+           }
+}
+
+
+@cds.changelog.enabled
+entity Order4Item : cuid {
+  @cds.changelog.enabled
+  order  : Association to one Order4;
+  @cds.changelog.enabled
+  Amount : Decimal;
+}

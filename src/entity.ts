@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE } from "./constants";
 
 export function isChangeLogEnabled(def: any) {
@@ -27,11 +28,14 @@ export function extractKeyElementsFromEntity(entityDef: any) {
     .map(([_, value]) => value);
 }
 
+const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
+
 
 export function extractChangeAwareElements(entityDef: any): Array<string> {
   return Object
     .entries(entityDef?.elements)
-    .filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true).map(([key]) => key);
+    .filter(([_, value]) => (value as any)?.[ANNOTATE_CHANGELOG_ENABLED] === true && !IGNORED_TYPES.includes((value as any).type))
+    .map(([key]) => key);
 }
 
 export function isChangeLogInternalEntity(name: string = "") {
