@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/Soontao/cds-change-log/compare/v0.0.2...v0.0.3) (2022-03-18)
+
+
+### Features
+
+* add cache ([17b1052](https://github.com/Soontao/cds-change-log/commit/17b10525aebf26fc3b9f389f9c27aedc2a81f358))
+* multi primary keys ([9e506cd](https://github.com/Soontao/cds-change-log/commit/9e506cd946343c5eb263018a5d1835567a5b4bc2))
+* refactor ([9a87450](https://github.com/Soontao/cds-change-log/commit/9a8745044a6f898fa8cbe8673386f4b28e2ce963))
+
 ### 0.0.2 (2022-03-17)
 
 
