@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/Soontao/cds-change-log/compare/v0.0.4...v0.0.5) (2022-03-21)
+
+
+### Features
+
+* filter localized ([fe7f534](https://github.com/Soontao/cds-change-log/commit/fe7f534b0b4298c0256c5995626c897f5f2d8ce0))
+* localization ([470e68b](https://github.com/Soontao/cds-change-log/commit/470e68bff2cdc8ec78911b9cdc9ebe396b7b888b))
+* partial insert ([25b7f4a](https://github.com/Soontao/cds-change-log/commit/25b7f4a53688acd44413c83d0597136428551470))
+* prepared for locale ([311ae30](https://github.com/Soontao/cds-change-log/commit/311ae30bcca5077d193092e98b9a1246e4947e0d))
+* user.id/actionBy ([1004087](https://github.com/Soontao/cds-change-log/commit/10040875ed23168bf78074b1fe09a18fe03af236))
+
 ### [0.0.4](https://github.com/Soontao/cds-change-log/compare/v0.0.3...v0.0.4) (2022-03-18)
 
 
