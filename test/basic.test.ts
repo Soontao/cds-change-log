@@ -35,7 +35,7 @@ describe("Basic Test Suite", () => {
     expect(response.status).toBe(200)
 
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$orderby=actionAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
 
     expect(response.status).toBe(200)
 
@@ -88,7 +88,7 @@ describe("Basic Test Suite", () => {
     response = await axios.delete(`/sample/Peoples(${ID})`)
     expect(response.status).toBe(204)
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$orderby=actionAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
     expect(response.status).toBe(200)
     expect(response.data.value).toHaveLength(2)
 

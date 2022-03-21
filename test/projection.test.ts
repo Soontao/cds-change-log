@@ -35,13 +35,12 @@ describe("Projection Test Suite", () => {
     expect(response.status).toBe(200)
 
 
-    response = await axios.get(`/sample/ChangeLogs?$orderby=createdAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
+    response = await axios.get(`/sample/ChangeLogs?$orderby=actionAt asc&$expand=Items&$filter=entityKey eq ${ID}`)
 
     expect(response.status).toBe(200)
 
     expect(response.data.value).toMatchObject([
       {
-        modifiedBy: "anonymous",
         entityName: "People",
         action: "Create",
         Items: [

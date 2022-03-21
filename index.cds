@@ -6,12 +6,12 @@ using {
 } from '@sap/cds/common';
 
 /**
- * common string type
+ * Common String Type
  */
 type CommonString : String(255);
 
 /**
- * change log action, mapped by CQL event
+ * **ChangeLog Action**, mapped by CQL event
  */
 type Action : String enum {
   Create;
@@ -19,16 +19,23 @@ type Action : String enum {
   Delete;
 };
 
+
 /**
- * change log table, used to store change log data
+ * the `ChangeLog` table, used to store change log data
  */
+@Capabilities : {
+  Insertable,
+  Readable,
+}
 @cds.autoexpose
-entity ChangeLog : cuid, managed {
+entity ChangeLog : cuid {
+
   /**
-   * root entity name, not view/projection
+   * root entity (Database Table Entity) name, not
+   * view/projection
    *
-   * it will be raw entity name, will not save projection/view
-   * data
+   * it will be raw CDS Entity Name (with namespace), will not
+   * save the projection/view data
    */
   entityName : CommonString not null;
 
@@ -36,7 +43,7 @@ entity ChangeLog : cuid, managed {
    * default key storage for common model
    */
   @cds.changelog.extension.entityKey
-  @cds.changelog.extension.for.type : cds.UUID
+  @cds.changelog.extension.for.type :         cds.UUID
   entityKey  : UUID;
   /**
    * locale
@@ -47,7 +54,19 @@ entity ChangeLog : cuid, managed {
    */
   action     : Action not null;
   /**
-   * detail of changed value
+   * log at timestamp
+   */
+  actionAt   : cds.Timestamp @cds.on.insert : $now;
+  /**
+   * log by user id
+   */
+  actionBy   : String(255)   @cds.on.insert : $user;
+
+  /**
+   * details of changed value
+   *
+   * it will be empty if no value changed or there is no
+   * annotated elements
    */
   Items      : Composition of many ChangeLog.Item
                  on Items.Parent = $self;

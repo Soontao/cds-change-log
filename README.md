@@ -59,10 +59,8 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
 [
   {
     ID: "595b3604-d7dd-434f-962c-1e70e92bd775",
-    createdAt: "2022-03-17T04:20:41.402Z",
-    createdBy: "anonymous",
-    modifiedAt: "2022-03-17T04:20:41.402Z",
-    modifiedBy: "anonymous",
+    actionAt: "2022-03-17T04:20:41.402Z",
+    actionBy: "anonymous",
     entityName: "People",
     entityKey: "0e926ff2-53ad-4cd9-9569-ad2147dad0bc",
     action: "Create",
@@ -86,10 +84,8 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
   },
   {
     ID: "55bca8b8-1e79-4c9b-8bc9-1a013bf3cf39",
-    createdAt: "2022-03-17T04:20:41.461Z",
-    createdBy: "anonymous",
-    modifiedAt: "2022-03-17T04:20:41.461Z",
-    modifiedBy: "anonymous",
+    actionAt: "2022-03-17T04:20:41.461Z",
+    actionBy: "anonymous",
     entityName: "People",
     entityKey: "0e926ff2-53ad-4cd9-9569-ad2147dad0bc",
     action: "Update",
