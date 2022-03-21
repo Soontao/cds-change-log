@@ -199,7 +199,7 @@ service SampleService {
 - [x] multi `CUD` CQL
 - [x] all `Update/Delete` CQL (without `where`)
 - [x] aspect support
-- [ ] localization support
+- [x] localization support
 - [x] custom type (e.g. Integer) key support
   - [x] metadata cache
 - [x] multi primary key support
@@ -208,6 +208,7 @@ service SampleService {
 - [ ] secondary storage like mongo/s3
 - [ ] association support
 - [ ] Samples
+  - [ ] localized data sample
   - [ ] for fiori elements
   - [ ] rows to columns table records
 

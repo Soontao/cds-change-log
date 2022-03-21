@@ -1,4 +1,5 @@
 import type { AxiosInstance } from "axios";
+import { ENTITIES } from "../src/constants";
 
 /**
  * setup a global test user with HTTP basic auth
@@ -22,4 +23,14 @@ export const setupTest = (...path: Array<string>): AxiosInstance => {
   const cds = require("@sap/cds") as any
   const { axios } = cds.test(".").in(...path)
   return axios
+}
+
+
+export const queryChangeLogsByID = (where: { entityName: any, entityKey: string, [key: string]: any }): Promise<Array<any>> => {
+  const cds = require("@sap/cds")
+  return cds.run(
+    cds.ql.SELECT
+      .from(ENTITIES.CHANGELOG, (c: any) => { c("*"), c.Items('*') })
+      .where(where)
+  )
 }

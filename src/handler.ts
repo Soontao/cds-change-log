@@ -4,7 +4,7 @@ import { ENTITIES } from "./constants";
 import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements, extractKeyNamesFromEntity, isChangeLogEnabled, isChangeLogInternalEntity } from "./entity";
 import { ChangeLogError } from "./error";
-import { createLocalizedDataQueryForOriginal, extractEntityNameFromQuery } from "./query";
+import { extractEntityFromQuery } from "./query";
 
 
 export function createChangeLogHandler(cds: any, db: any) {
@@ -15,7 +15,9 @@ export function createChangeLogHandler(cds: any, db: any) {
   return async function changeLogHandler(req: any, next: () => Promise<any>) {
     const { query } = req;
 
-    const entityName = extractEntityNameFromQuery(query);
+    const entity = extractEntityFromQuery(query);
+    const entityName = typeof entity === "string" ? entity : entity.ref[0]; // TODO: warning when other cases
+    
     if (entityName === undefined || isChangeLogInternalEntity(entityName)) {
       return next();
     }
@@ -25,7 +27,7 @@ export function createChangeLogHandler(cds: any, db: any) {
       return next();
     }
 
-    const targetEntityElements = extractChangeAwareElements(entityDef);
+    const entityChangeLogElementKeys = extractChangeAwareElements(entityDef).map(ele => ele.name);
 
     const entityPrimaryKeys = extractKeyNamesFromEntity(entityDef);
 
@@ -33,7 +35,7 @@ export function createChangeLogHandler(cds: any, db: any) {
       throw new ChangeLogError(`entity '${entityName}' must have at least one primary key for change log`);
     }
 
-    let changeLogPromises: Promise<any>[] = [];
+    let queuedChangeLogs: Array<any> = [];
 
     const batches: Array<Promise<void>> = [];
 
@@ -43,28 +45,27 @@ export function createChangeLogHandler(cds: any, db: any) {
      * @param log 
      */
     const queueChangeLog = async (log: any) => {
-      changeLogPromises.push(log);
-      if (changeLogPromises.length >= 100) { await saveChangeLog(); }
+      queuedChangeLogs.push(log);
+      if (queuedChangeLogs.length >= 100) { await saveChangeLog(); }
     };
 
     /**
      * save change log to the database
      */
     const saveChangeLog = async () => {
-      if (changeLogPromises.length > 0) {
-        const [...tmpPromises] = changeLogPromises;
-        changeLogPromises = [];
-        const changeLogEntries = await Promise.all(tmpPromises);
+      if (queuedChangeLogs.length > 0) {
+        const [...tmpChangeLogs] = queuedChangeLogs;
+        queuedChangeLogs = [];
         batches.push(
           db
-            .run(INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogEntries))
+            .run(INSERT.into(ENTITIES.CHANGELOG).entries(...tmpChangeLogs))
             .then(() => undefined)
         );
       }
     };
 
     // query for UPDATE/DELETE
-    const originalDataQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...targetEntityElements.map(ele => ele.name));
+    const originalDataQuery = SELECT.from(entity).columns(...entityPrimaryKeys, ...entityChangeLogElementKeys);
 
     const where = query?.DELETE?.where ?? query?.UPDATE?.where;
 
@@ -77,26 +78,20 @@ export function createChangeLogHandler(cds: any, db: any) {
         data.forEach(change => queueChangeLog(buildChangeLog(entityDef, context, undefined, change)));
         break;
       case "DELETE":
-        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(
-          buildChangeLog(
-            entityDef,
-            context,
-            original,
-            undefined,
-            createLocalizedDataQueryForOriginal(entityDef, original))
-        )
-        );
+        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(buildChangeLog(
+          entityDef,
+          context,
+          original,
+          undefined,
+        )));
         break;
       case "UPDATE":
-        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(
-          buildChangeLog(
-            entityDef,
-            context,
-            original,
-            req.data,
-            createLocalizedDataQueryForOriginal(entityDef, original)
-          )
-        ));
+        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(buildChangeLog(
+          entityDef,
+          context,
+          original,
+          req.data,
+        )));
         break;
       default:
         break;

@@ -3,7 +3,13 @@ import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE } from "./constants";
 
 export function isChangeLogEnabled(def: any) {
   if (def !== undefined) {
-    return ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true;
+
+    if (ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true) {
+      return true;
+    }
+    if (extractChangeAwareElements(def).length > 0) {
+      return true;
+    }
   }
   return false;
 }
@@ -48,7 +54,6 @@ export function extractChangeAwareElements(entityDef: any): Array<any> {
     .filter((entry: any[]) =>
       entry[1]?.[ANNOTATE_CHANGELOG_ENABLED] === true &&
       entry[1]?.key !== true && // ignore key
-      entry[1]?.localized !== true &&
       !IGNORED_TYPES.includes(entry[1].type)
     )
     .map(entry => entry[1]);

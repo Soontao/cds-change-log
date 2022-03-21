@@ -48,6 +48,9 @@ export class ChangeLogContext {
       }
       return changelogElementName;
     }
+    if (targetEntityElement.name === "locale") {
+      return "locale";
+    }
     return this.findKeyByType(targetEntityElement.type);
   }
 

@@ -1,7 +1,5 @@
 
-import cds from "@sap/cds";
-import { ENTITIES } from "../src/constants";
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { queryChangeLogsByID, setupIgnoreStatus, setupTest } from "./utils";
 
 
 describe('Locale Test Suite', () => {
@@ -15,22 +13,93 @@ describe('Locale Test Suite', () => {
       }
     })
 
+    const entityKey = response.data.ID
+
     expect(response.status).toBe(201)
 
-    response = await axios.patch(`/sample/Books(${response.data.ID})`, { Name: "老人与海" }, {
-      headers: {
-        'Accept-Language': 'zh_CN'
-      }
-    })
+    response = await axios.post(`/sample/Books(${entityKey})/texts`, { Name: "老人与海", locale: "zh_CN" })
+    expect(response.status).toBe(201)
+
+
+    response = await axios.patch(`/sample/Books(${entityKey})/texts(ID=${entityKey},locale='zh_CN')`, { Name: "老人与海 (New)" })
     expect(response.status).toBe(200)
+    response = await axios.delete(`/sample/Books(${entityKey})`)
+    expect(response.status).toBe(204)
 
-    const logs = await cds.run(
-      SELECT
-        .from(ENTITIES.CHANGELOG, (c: any) => { c("*"), c.Items('*') })
-        .where({ entityName: 'Book', entityKey: response.data.ID })
-    )
+    const logs = await queryChangeLogsByID({ entityName: { in: ["Book", "Book.texts"] }, entityKey, })
 
-    expect(logs).toHaveLength(2)
+    expect(logs).toHaveLength(4)
+
+    expect(logs).toMatchObject([
+      {
+        entityName: "Book",
+        locale: "en",
+        action: "Create",
+        actionBy: "anonymous",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: "The Old Man and the Sea",
+            attributeOldValue: null,
+          },
+          {
+            sequence: 1,
+            attributeKey: "Price",
+            attributeNewValue: "88.12",
+            attributeOldValue: null,
+          },
+        ],
+      },
+      {
+        entityName: "Book.texts",
+        locale: "zh_CN",
+        action: "Create",
+        actionBy: "anonymous",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: "老人与海",
+            attributeOldValue: null,
+          },
+        ],
+      },
+      {
+        entityName: "Book.texts",
+        locale: "zh_CN",
+        action: "Update",
+        actionBy: "anonymous",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: "老人与海 (New)",
+            attributeOldValue: "老人与海",
+          },
+        ],
+      },
+      {
+        entityName: "Book",
+        locale: "en",
+        action: "Delete",
+        actionBy: "anonymous",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: null,
+            attributeOldValue: "The Old Man and the Sea",
+          },
+          {
+            sequence: 1,
+            attributeKey: "Price",
+            attributeNewValue: null,
+            attributeOldValue: "88.12",
+          },
+        ],
+      },
+    ])
 
   });
 

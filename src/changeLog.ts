@@ -17,12 +17,11 @@ import { cwdRequire, defaultStringOrNull } from "./utils";
  * @param change change value from requests, optional
  * @returns change log item
  */
-export const buildChangeLog = async (
+export const buildChangeLog = (
   entityDef: any,
   context: ChangeLogContext,
   original?: any,
   change?: any,
-  localizedQuery?: () => Promise<any | null>,
 ): Promise<any> => {
 
   if (original === undefined && change === undefined) {
@@ -30,14 +29,9 @@ export const buildChangeLog = async (
   }
   const entityName = entityDef.name;
   const entityElements = extractChangeAwareElements(entityDef);
-  const entityElementsKeys = entityElements.map(ele => ele.name);
-
-  let localizedValues: any = null;
-  if (localizedQuery !== undefined) {
-    localizedValues = await localizedQuery();
-  }
 
   const cds = cwdRequire("@sap/cds");
+  const defaultLocale = cds?.env?.i18n?.default_language ?? "en";
 
   // determine action by inbound changed value and original database value
   let action: string | undefined;
@@ -60,19 +54,12 @@ export const buildChangeLog = async (
       return pre;
     }, {});
 
-
-
-
   // normal raw elements
   const Items = entityElements
     .filter(ele => action === ACTIONS.Update ? ele.name in change : true) // for update, if not put into payload, no update
     .map(
       (ele) => {
         const key = ele.name;
-
-        // if value from normal element, use original
-        // other wise, use localized values
-        const localOriginal = entityElementsKeys.includes(key) ? original : localizedValues;
 
         let attributeNewValue = null;
         let attributeOldValue = null;
@@ -81,11 +68,11 @@ export const buildChangeLog = async (
             attributeNewValue = defaultStringOrNull(change?.[key]);
             break;
           case ACTIONS.Delete:
-            attributeOldValue = defaultStringOrNull(localOriginal?.[key]);
+            attributeOldValue = defaultStringOrNull(original?.[key]);
             break;
           case ACTIONS.Update:
             attributeNewValue = defaultStringOrNull(change?.[key]);
-            attributeOldValue = defaultStringOrNull(localOriginal?.[key]);
+            attributeOldValue = defaultStringOrNull(original?.[key]);
           default:
             break;
         }
@@ -105,10 +92,11 @@ export const buildChangeLog = async (
     });
 
 
+  // TODO: check column keys
   return {
-    ...keys,
+    locale: defaultLocale, // default locale
+    ...keys, // if locale is key
     entityName,
-    locale: cds.context.locale,
     action,
     actionBy: cds.context.user?.is?.("system-user") ? "system-user" : cds.context?.user?.id ?? "anonymous",
     actionAt: cds.context.timestamp,
