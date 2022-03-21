@@ -45,5 +45,11 @@
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "keywords": [
+    "SAP",
+    "CAP",
+    "Change Log",
+    "Framework"
+  ]
 }
