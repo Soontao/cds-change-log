@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { ACTIONS } from "./constants";
 import { ChangeLogContext } from "./context";
-import { extractChangeAwareElements, extractChangeAwareLocalizedElements } from "./entity";
+import { extractChangeAwareElements } from "./entity";
 import { cwdRequire, defaultStringOrNull } from "./utils";
 
 
@@ -15,21 +15,27 @@ import { cwdRequire, defaultStringOrNull } from "./utils";
  * @param entityElements columns of entity
  * @param original original value in db, optional
  * @param change change value from requests, optional
- * @returns 
+ * @returns change log item
  */
-export const buildChangeLog = (
+export const buildChangeLog = async (
   entityDef: any,
   context: ChangeLogContext,
   original?: any,
   change?: any,
-) => {
+  localizedQuery?: () => Promise<any | null>,
+): Promise<any> => {
 
   if (original === undefined && change === undefined) {
     throw new TypeError("require original data or change data at least");
   }
   const entityName = entityDef.name;
   const entityElements = extractChangeAwareElements(entityDef);
-  const localizedElements = extractChangeAwareLocalizedElements(entityDef);
+  const entityElementsKeys = entityElements.map(ele => ele.name);
+
+  let localizedValues: any = null;
+  if (localizedQuery !== undefined) {
+    localizedValues = await localizedQuery();
+  }
 
   const cds = cwdRequire("@sap/cds");
 
@@ -54,24 +60,32 @@ export const buildChangeLog = (
       return pre;
     }, {});
 
-  const Items = [...entityElements, ...localizedElements]
+
+
+
+  // normal raw elements
+  const Items = entityElements
     .filter(ele => action === ACTIONS.Update ? ele.name in change : true) // for update, if not put into payload, no update
     .map(
       (ele) => {
         const key = ele.name;
 
+        // if value from normal element, use original
+        // other wise, use localized values
+        const localOriginal = entityElementsKeys.includes(key) ? original : localizedValues;
+
         let attributeNewValue = null;
         let attributeOldValue = null;
         switch (action) {
           case ACTIONS.Create:
-            attributeNewValue = defaultStringOrNull(change[key]);
+            attributeNewValue = defaultStringOrNull(change?.[key]);
             break;
           case ACTIONS.Delete:
-            attributeOldValue = defaultStringOrNull(original?.[key]);
+            attributeOldValue = defaultStringOrNull(localOriginal?.[key]);
             break;
           case ACTIONS.Update:
-            attributeNewValue = defaultStringOrNull(change[key]);
-            attributeOldValue = defaultStringOrNull(original?.[key]);
+            attributeNewValue = defaultStringOrNull(change?.[key]);
+            attributeOldValue = defaultStringOrNull(localOriginal?.[key]);
           default:
             break;
         }
@@ -90,13 +104,16 @@ export const buildChangeLog = (
       return item;
     });
 
-  // TODO: copy createdAt/modifiedAt from target entity
+
   return {
     ...keys,
     entityName,
     locale: cds.context.locale,
     action,
+    actionBy: cds.context.user?.is?.("system-user") ? "system-user" : cds.context?.user?.id ?? "anonymous",
+    actionAt: cds.context.timestamp,
     Items
   };
+
 };
 

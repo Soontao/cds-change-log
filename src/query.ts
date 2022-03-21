@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import { extractChangeAwareLocalizedElements, extractKeyNamesFromEntity } from "./entity";
+import { extractKeyNamesFromEntity } from "./entity";
 import { cwdRequire } from "./utils";
 
 export function extractEntityNameFromQuery(query: any): string {
@@ -12,21 +12,25 @@ export function extractEntityNameFromQuery(query: any): string {
  * 
  * @param entityDef entity definition
  * @param original original value
- * @returns 
+ * @returns
  */
-export const buildLocalizedOriginalDataQuery = (entityDef: any, original: any) => {
-  const cds = cwdRequire("@sap/cds");;
-  const { ql: { SELECT } } = cds;
-  const entityName = entityDef.name;
-
-  const localizedChangeLogElements = extractChangeAwareLocalizedElements(entityDef);
-
+export const createLocalizedDataQueryForOriginal = (entityDef: any, original: any) => async (): Promise<any | null> => {
+  const cds = cwdRequire("@sap/cds");
+  const { SELECT } = cds.ql;
   const keyNames = extractKeyNamesFromEntity(entityDef);
-
-  const query = SELECT
-    .one
-    .from(`${entityName}.texts`)
-    .columns(localizedChangeLogElements.map(ele => ele.name))
-    .where(keyNames.reduce((acc: any, pk: string) => { acc[pk] = original[pk]; return acc; }, { locale: cds.context.locale }));
-  return query;
+  const entityName = entityDef.name;
+  const localizedTableForEntity = `${entityName}.texts`;
+  if (localizedTableForEntity in cds.model) {
+    const query = SELECT
+      .one
+      .from(localizedTableForEntity)
+      .where(
+        keyNames.reduce(
+          (acc: any, pk: string) => { acc[pk] = original[pk]; return acc; },
+          { locale: cds.context.locale }
+        )
+      );
+    return cds.run(query);
+  }
+  return Promise.resolve(null);
 };

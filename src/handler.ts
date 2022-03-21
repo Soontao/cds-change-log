@@ -4,10 +4,11 @@ import { ENTITIES } from "./constants";
 import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements, extractKeyNamesFromEntity, isChangeLogEnabled, isChangeLogInternalEntity } from "./entity";
 import { ChangeLogError } from "./error";
-import { extractEntityNameFromQuery } from "./query";
+import { createLocalizedDataQueryForOriginal, extractEntityNameFromQuery } from "./query";
 
 
 export function createChangeLogHandler(cds: any, db: any) {
+
   const { INSERT, SELECT } = cds.ql;
   const context = new ChangeLogContext(cds.model.definitions[ENTITIES.CHANGELOG]);
 
@@ -32,18 +33,35 @@ export function createChangeLogHandler(cds: any, db: any) {
       throw new ChangeLogError(`entity '${entityName}' must have at least one primary key for change log`);
     }
 
-    let changeLogs: any[] = [];
+    let changeLogPromises: Promise<any>[] = [];
 
-    const insertions: Array<Promise<void>> = [];
+    const batches: Array<Promise<void>> = [];
 
-    const saveChangeLog = (log: any) => {
-      changeLogs.push(log);
-      if (changeLogs.length > 100) {
-        insertions.push(db.run(INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogs)).then(() => undefined));
-        changeLogs = [];
-      }
+    /**
+     * queue change log to an in memory queue, and perform batch insert later
+     * 
+     * @param log 
+     */
+    const queueChangeLog = async (log: any) => {
+      changeLogPromises.push(log);
+      if (changeLogPromises.length >= 100) { await saveChangeLog(); }
     };
 
+    /**
+     * save change log to the database
+     */
+    const saveChangeLog = async () => {
+      if (changeLogPromises.length > 0) {
+        const [...tmpPromises] = changeLogPromises;
+        changeLogPromises = [];
+        const changeLogEntries = await Promise.all(tmpPromises);
+        batches.push(
+          db
+            .run(INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogEntries))
+            .then(() => undefined)
+        );
+      }
+    };
 
     // query for UPDATE/DELETE
     const originalDataQuery = SELECT.from(entityName).columns(...entityPrimaryKeys, ...targetEntityElements.map(ele => ele.name));
@@ -56,25 +74,37 @@ export function createChangeLogHandler(cds: any, db: any) {
     switch (req.event) {
       case "CREATE":
         const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-        data.forEach(change => saveChangeLog(buildChangeLog(entityDef, context, undefined, change)));
+        data.forEach(change => queueChangeLog(buildChangeLog(entityDef, context, undefined, change)));
         break;
       case "DELETE":
-        await db.foreach(originalDataQuery, (original: any) => saveChangeLog(buildChangeLog(entityDef, context, original)));
+        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(
+          buildChangeLog(
+            entityDef,
+            context,
+            original,
+            undefined,
+            createLocalizedDataQueryForOriginal(entityDef, original))
+        )
+        );
         break;
       case "UPDATE":
-        await db.foreach(originalDataQuery, (original: any) => saveChangeLog(buildChangeLog(entityDef, context, original, req.data)));
+        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(
+          buildChangeLog(
+            entityDef,
+            context,
+            original,
+            req.data,
+            createLocalizedDataQueryForOriginal(entityDef, original)
+          )
+        ));
         break;
       default:
         break;
     }
 
-    if (changeLogs.length > 0) {
-      insertions.push(INSERT.into(ENTITIES.CHANGELOG).entries(...changeLogs));
-    }
+    await saveChangeLog();
 
-    if (insertions.length > 0) {
-      await Promise.all(insertions);
-    }
+    if (batches.length > 0) { await Promise.all(batches); }
 
     return next();
   };
