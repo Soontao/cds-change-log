@@ -23,10 +23,7 @@ type Action : String enum {
 /**
  * the `ChangeLog` table, used to store change log data
  */
-@Capabilities : {
-  Insertable,
-  Readable,
-}
+@readonly
 @cds.autoexpose
 entity ChangeLog : cuid {
 

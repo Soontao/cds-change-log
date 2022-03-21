@@ -11,8 +11,6 @@ import { cwdRequire, defaultStringOrNull } from "./utils";
  * @internal
  * @private
  * @param entityDef entity def
- * @param keyNames keys of entity
- * @param entityElements columns of entity
  * @param original original value in db, optional
  * @param change change value from requests, optional
  * @returns change log item

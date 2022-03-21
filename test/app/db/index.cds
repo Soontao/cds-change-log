@@ -64,7 +64,7 @@ entity Book : cuid {
   Name  : localized String(255);
   @cds.changelog.enabled
   Price : Decimal;
-  
+
 }
 
 

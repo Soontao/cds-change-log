@@ -64,7 +64,6 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
     entityName: "People",
     entityKey: "0e926ff2-53ad-4cd9-9569-ad2147dad0bc",
     action: "Create",
-    entityKeyInteger: null,
     Items: [
       {
         sequence: 0,
@@ -89,7 +88,6 @@ await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
     entityName: "People",
     entityKey: "0e926ff2-53ad-4cd9-9569-ad2147dad0bc",
     action: "Update",
-    entityKeyInteger: null,
     Items: [
       {
         sequence: 0,
@@ -206,7 +204,8 @@ service SampleService {
 - [x] extension field support
 - [ ] validation at startup
 - [ ] secondary storage like mongo/s3
-- [ ] association support
+- [ ] readable identifier support `@title`/`@description`
+- [ ] association/composition support
 - [ ] Samples
   - [ ] localized data sample
   - [ ] for fiori elements
