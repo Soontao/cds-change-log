@@ -202,10 +202,11 @@ service SampleService {
 - [x] all `Update/Delete` CQL (without `where`)
 - [x] aspect support
 - [x] localization support
-- [x] custom type (e.g. Integer) key support
+- [x] custom type key (e.g. Integer) support
   - [x] metadata cache
 - [x] multi primary key support
 - [x] extension field support
+- [ ] benchmark test
 - [ ] validation at startup
 - [ ] secondary storage like mongo/s3
 - [ ] readable identifier support `@title`/`@description`

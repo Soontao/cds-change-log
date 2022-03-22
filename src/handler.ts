@@ -2,7 +2,7 @@
 import { buildChangeLog } from "./changeLog";
 import { ENTITIES } from "./constants";
 import { ChangeLogContext } from "./context";
-import { extractChangeAwareElements, extractKeyNamesFromEntity, isChangeLogEnabled, isChangeLogInternalEntity } from "./entity";
+import { extractChangeAwareElements, extractKeyNamesFromEntity } from "./entity";
 import { ChangeLogError } from "./error";
 import { extractEntityFromQuery } from "./query";
 
@@ -17,15 +17,8 @@ export function createChangeLogHandler(cds: any, db: any) {
 
     const entity = extractEntityFromQuery(query); // it could be entityName or ref objects
     const entityName = typeof entity === "string" ? entity : entity.ref[0]; // TODO: warning when other cases
-    
-    if (entityName === undefined || isChangeLogInternalEntity(entityName)) {
-      return next();
-    }
 
     const entityDef = cds.model.definitions[entityName];
-    if (entityDef === undefined || !isChangeLogEnabled(entityDef)) {
-      return next();
-    }
 
     const entityChangeLogElementKeys = extractChangeAwareElements(entityDef).map(ele => ele.name);
 

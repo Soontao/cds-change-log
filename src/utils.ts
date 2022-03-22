@@ -21,16 +21,21 @@ export const cwdRequire = (id: string) => require(require.resolve(id, { paths: [
 /**
  * utils for memorized (sync) **ONE-parameter** function
  * 
- * @param func 
+ * @param func a function which only have one parameter
  * @returns 
  */
-export const memorized = <T extends (...args: any[]) => any>(func: T): T => {
-  const cache = new WeakMap();
+export const memorized = <T extends (arg0: any) => any>(func: T): T => {
+  let cache: WeakMap<any, any>;
 
   // @ts-ignore
-  return (arg0: any, ...args: any[]) => {
+  return function (arg0: any) {
+    if (cache === undefined && typeof arg0 === "string") {
+      cache = new Map();
+    } else {
+      cache = new WeakMap();
+    }
     if (!cache.has(arg0)) {
-      cache.set(arg0, func(arg0, ...args));
+      cache.set(arg0, func(arg0));
     }
     return cache.get(arg0);
   };

@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import { ENTITIES } from "./constants";
+import { extractChangeLogAwareEntities } from "./entity";
 import { createChangeLogHandler } from "./handler";
 
 
@@ -14,9 +15,15 @@ export function applyChangeLog(cds: any) {
   const logger = cds.log("changelog.apply");
   cds.on("served", async () => {
     if (ENTITIES.CHANGELOG in cds?.model?.definitions) {
+
       const db = await cds.connect.to("db");
-      const handler = createChangeLogHandler(cds, db);
-      db.prepend((srv: any) => srv.on(["CREATE", "UPDATE", "DELETE"], handler));
+      
+      db.prepend((srv: any) => srv.on(
+        ["CREATE", "UPDATE", "DELETE"],
+        extractChangeLogAwareEntities(cds),
+        createChangeLogHandler(cds, db)
+      ));
+      
     } else {
       logger.error(`applyChangeLog, but not include the entity`, ENTITIES.CHANGELOG);
     }

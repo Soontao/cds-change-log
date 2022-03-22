@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET, ENTITIES } from "./constants";
-import { extractKeyNamesFromEntity } from "./entity";
+import { extractKeyNamesFromEntity, isLocalizedEntityDef } from "./entity";
 import { ChangeLogError } from "./error";
 
 export type KeyMapping = Array<[changeLogElementKey: string, targetEntityKey: string]>;
@@ -48,9 +48,6 @@ export class ChangeLogContext {
       }
       return changelogElementName;
     }
-    if (targetEntityElement.name === "locale") {
-      return "locale";
-    }
     return this.findKeyByType(targetEntityElement.type);
   }
 
@@ -66,7 +63,11 @@ export class ChangeLogContext {
       const targetEntityKeyNames = extractKeyNamesFromEntity(targetEntityDef);
       for (const targetEntityKeyName of targetEntityKeyNames) {
         const targetEntityElementDef = targetEntityDef.elements[targetEntityKeyName];
-        const changeLogEntityKeyName = this.findKeyName(targetEntityElementDef);
+        let changeLogEntityKeyName = this.findKeyName(targetEntityElementDef);
+        // for locale (`Entity.texts`) entities
+        if (changeLogEntityKeyName === undefined && isLocalizedEntityDef(targetEntityDef) && targetEntityKeyName === "locale") {
+          changeLogEntityKeyName = "locale";
+        }
         if (changeLogEntityKeyName === undefined) {
           throw new ChangeLogError(`not found proper column to store value of '${targetEntityDef.name}'.'${targetEntityKeyName}'`);
         }

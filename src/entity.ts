@@ -1,7 +1,24 @@
 /* eslint-disable max-len */
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE } from "./constants";
 import { EntityDefinition } from "./type";
-import { memorized } from "./utils";
+import { cwdRequire, memorized } from "./utils";
+
+const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
+
+
+/**
+ * is raw entity (database table)
+ * 
+ * not projection/select entity
+ * 
+ * @param def
+ */
+export const isRawEntity = memorized((def: any) => {
+  if (def !== undefined && def?.kind === "entity" && def?.query === undefined && def.projection === undefined) {
+    return true;
+  }
+  return false;
+});
 
 /**
  * @scope server
@@ -9,11 +26,8 @@ import { memorized } from "./utils";
  * @returns 
  */
 export const isChangeLogEnabled = memorized((def: any) => {
-  if (def !== undefined) {
+  if (def !== undefined && !isChangeLogInternalEntity(def?.name)) {
     if (ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true) {
-      return true;
-    }
-    if (extractChangeAwareElements(def).length > 0) {
       return true;
     }
   }
@@ -42,8 +56,6 @@ export const extractKeyElementsFromEntity = memorized((entityDef: EntityDefiniti
     .map(([_, value]) => value);
 });
 
-const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
-
 /**
  * @scope server
  * @param entityDef 
@@ -51,6 +63,24 @@ const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
  */
 export const isLocalizedAndChangeLogRelated = memorized((entityDef: EntityDefinition): boolean => {
   return extractChangeAwareLocalizedElements(entityDef).length > 0;
+});
+
+/**
+ * giving entity is localized entity definition or not
+ * 
+ * @param entityDef
+ */
+export const isLocalizedEntityDef = memorized((entityDef: EntityDefinition) => {
+  const cds = cwdRequire("@sap/cds");
+  if (entityDef?.name?.length >= 6 && entityDef?.name?.endsWith(".texts")) {
+    const rawEntityName = entityDef.name.substr(0, entityDef.name.length - 6);
+    if (rawEntityName in cds.model?.definitions) {
+      if (isLocalizedAndChangeLogRelated(cds.model.definitions[rawEntityName])) {
+        return true;
+      }
+    }
+  }
+  return false;
 });
 
 /**
@@ -93,4 +123,11 @@ export const extractChangeAwareElements = memorized((entityDef: EntityDefinition
  */
 export function isChangeLogInternalEntity(name: string = "") {
   return name.startsWith(CHANGELOG_NAMESPACE);
+}
+
+export function extractChangeLogAwareEntities(cds: any): Array<any> {
+  return Object
+    .values(cds.model.definitions)
+    .filter(isRawEntity)
+    .filter(def => isChangeLogEnabled(def) || isLocalizedEntityDef(def));
 }
