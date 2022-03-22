@@ -140,7 +140,8 @@ extend ChangeLog with {
   // add a new column 'entityKeyInteger' for integer key
   @cds.changelog.extension.entityKey
   // this column will be used when entity use `Integer` as primary key
-  @cds.changelog.extension.for.type : cds.Integer  // MUST add the `cds.` prefix for built-in types
+  // MUST add the `cds.` prefix for built-in types
+  @cds.changelog.extension.for.type : cds.Integer 
   entityKeyInteger : Integer;
   
 };
