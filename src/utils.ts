@@ -1,5 +1,11 @@
 import process from "process";
 
+/**
+ * return null if strings are `null`/`undefined`
+ * 
+ * @param args 
+ * @returns 
+ */
 export const defaultStringOrNull = (...args: Array<any>) => {
   for (const arg of args) {
     if (arg !== undefined && arg !== null) {
@@ -29,10 +35,10 @@ export const memorized = <T extends (arg0: any) => any>(func: T): T => {
 
   // @ts-ignore
   return function (arg0: any) {
-    if (cache === undefined && typeof arg0 === "string") {
-      cache = new Map();
-    } else {
+    if (typeof arg0 === "object") {
       cache = new WeakMap();
+    } else {
+      cache = new Map();
     }
     if (!cache.has(arg0)) {
       cache.set(arg0, func(arg0));
