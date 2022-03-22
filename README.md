@@ -24,11 +24,14 @@ module.exports = cds.server
 
 `entity.cds`
 
+- **MUST** have `using from 'cds-change-log'` in CDS model
 - **MUST** annotating at both entity and field/element level
 - **MUST** annotating at the root/raw `entity` level, annotations on `projection`/`view` will not work
 - **MUST** have at least one PRIMARY KEY
 
 ```groovy
+using from 'cds-change-log'
+
 entity People : cuid, managed {
   Name : String(255);
   Age  : Integer;

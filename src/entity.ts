@@ -1,9 +1,15 @@
 /* eslint-disable max-len */
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE } from "./constants";
+import { EntityDefinition } from "./type";
+import { memorized } from "./utils";
 
-export function isChangeLogEnabled(def: any) {
+/**
+ * @scope server
+ * @param def entity definition
+ * @returns 
+ */
+export const isChangeLogEnabled = memorized((def: any) => {
   if (def !== undefined) {
-
     if (ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true) {
       return true;
     }
@@ -12,7 +18,7 @@ export function isChangeLogEnabled(def: any) {
     }
   }
   return false;
-}
+});
 
 /**
  * extract key names from entity definition
@@ -20,24 +26,40 @@ export function isChangeLogEnabled(def: any) {
  * @param entityDef 
  * @returns 
  */
-export function extractKeyNamesFromEntity(entityDef: any) {
+export const extractKeyNamesFromEntity = memorized((entityDef: EntityDefinition) => {
   return extractKeyElementsFromEntity(entityDef).map((ele: any) => ele.name);
-}
+});
 
-export function extractKeyElementsFromEntity(entityDef: any) {
+/**
+ * @scope server
+ * @param entityDef 
+ * @returns 
+ */
+export const extractKeyElementsFromEntity = memorized((entityDef: EntityDefinition) => {
   return Object
     .entries(entityDef?.elements ?? [])
     .filter(([_, value]) => (value as any)?.key)
     .map(([_, value]) => value);
-}
+});
 
 const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
 
-export function isLocalizedAndChangeLogRelated(entityDef: any): boolean {
+/**
+ * @scope server
+ * @param entityDef 
+ * @returns 
+ */
+export const isLocalizedAndChangeLogRelated = memorized((entityDef: EntityDefinition): boolean => {
   return extractChangeAwareLocalizedElements(entityDef).length > 0;
-}
+});
 
-export function extractChangeAwareLocalizedElements(entityDef: any): Array<any> {
+/**
+ * 
+ * @scope server
+ * @param entityDef 
+ * @returns 
+ */
+export const extractChangeAwareLocalizedElements = memorized((entityDef: EntityDefinition): Array<any> => {
   return Object
     .entries(entityDef?.elements)
     .filter((entry: any[]) =>
@@ -46,9 +68,14 @@ export function extractChangeAwareLocalizedElements(entityDef: any): Array<any> 
       !IGNORED_TYPES.includes(entry[1].type)
     )
     .map(entry => entry[1]);
-}
+});
 
-export function extractChangeAwareElements(entityDef: any): Array<any> {
+/**
+ * @scope server
+ * @param entityDef 
+ * @returns 
+ */
+export const extractChangeAwareElements = memorized((entityDef: EntityDefinition): Array<any> => {
   return Object
     .entries(entityDef?.elements)
     .filter((entry: any[]) =>
@@ -57,8 +84,13 @@ export function extractChangeAwareElements(entityDef: any): Array<any> {
       !IGNORED_TYPES.includes(entry[1].type)
     )
     .map(entry => entry[1]);
-}
+});
 
+/**
+ * @scope server
+ * @param name entity name
+ * @returns 
+ */
 export function isChangeLogInternalEntity(name: string = "") {
   return name.startsWith(CHANGELOG_NAMESPACE);
 }

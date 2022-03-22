@@ -15,7 +15,7 @@ export function createChangeLogHandler(cds: any, db: any) {
   return async function changeLogHandler(req: any, next: () => Promise<any>) {
     const { query } = req;
 
-    const entity = extractEntityFromQuery(query);
+    const entity = extractEntityFromQuery(query); // it could be entityName or ref objects
     const entityName = typeof entity === "string" ? entity : entity.ref[0]; // TODO: warning when other cases
     
     if (entityName === undefined || isChangeLogInternalEntity(entityName)) {

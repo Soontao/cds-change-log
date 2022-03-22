@@ -1,5 +1,12 @@
 /* eslint-disable max-len */
 
-export function extractEntityFromQuery(query: any): any {
+import { CQN } from "./type";
+
+/**
+ * @scope request
+ * @param query 
+ * @returns 
+ */
+export function extractEntityFromQuery(query: CQN): any {
   return query?.INSERT?.into ?? query?.UPDATE?.entity ?? query?.DELETE?.from;
 }

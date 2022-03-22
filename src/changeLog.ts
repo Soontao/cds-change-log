@@ -2,6 +2,7 @@
 import { ACTIONS } from "./constants";
 import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements } from "./entity";
+import { EntityDefinition } from "./type";
 import { cwdRequire, defaultStringOrNull } from "./utils";
 
 
@@ -16,7 +17,7 @@ import { cwdRequire, defaultStringOrNull } from "./utils";
  * @returns change log item
  */
 export const buildChangeLog = (
-  entityDef: any,
+  entityDef: EntityDefinition,
   context: ChangeLogContext,
   original?: any,
   change?: any,
