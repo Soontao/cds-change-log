@@ -5,6 +5,8 @@ import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements, extractKeyNamesFromEntity } from "./entity";
 import { ChangeLogError } from "./error";
 import { extractEntityFromQuery } from "./query";
+import { CQN } from "./type";
+import { cwdRequire } from "./utils";
 
 
 export function createChangeLogHandler(cds: any, db: any) {
@@ -12,9 +14,11 @@ export function createChangeLogHandler(cds: any, db: any) {
   const { INSERT, SELECT } = cds.ql;
   const context = new ChangeLogContext(cds.model.definitions[ENTITIES.CHANGELOG]);
 
-  return async function changeLogHandler(req: any, next: () => Promise<any>) {
-    const { query } = req;
+  const { hasDeepDelete, getDeepDeleteCQNs } = cwdRequire("@sap/cds/libx/_runtime/common/composition");
+  const { getFlatArray } = cwdRequire("@sap/cds/libx/_runtime/db/utils/deep");
 
+  async function changeLogHandler(req: { query: CQN, event: string, data?: any }) {
+    const { query } = req;
     const entity = extractEntityFromQuery(query); // it could be entityName or ref objects
     const entityName = typeof entity === "string" ? entity : entity.ref[0]; // TODO: warning when other cases
 
@@ -34,8 +38,8 @@ export function createChangeLogHandler(cds: any, db: any) {
 
     /**
      * queue change log to an in memory queue, and perform batch insert later
-     * 
-     * @param log 
+     *
+     * @param log
      */
     const queueChangeLog = async (log: any) => {
       queuedChangeLogs.push(log);
@@ -71,11 +75,16 @@ export function createChangeLogHandler(cds: any, db: any) {
         data.forEach(change => queueChangeLog(buildChangeLog(entityDef, context, undefined, change)));
         break;
       case "DELETE":
+        if (hasDeepDelete(cds.model, query)) {
+          const deletions = getFlatArray(await getDeepDeleteCQNs(cds.model, req)).filter((cqn: CQN) => cqn !== query);
+          for (const deletion of deletions) {
+            await changeLogHandler({ query: deletion, event: "DELETE" });
+          }
+        }
         await db.foreach(originalDataQuery, (original: any) => queueChangeLog(buildChangeLog(
           entityDef,
           context,
           original,
-          undefined,
         )));
         break;
       case "UPDATE":
@@ -83,7 +92,7 @@ export function createChangeLogHandler(cds: any, db: any) {
           entityDef,
           context,
           original,
-          req.data,
+          req.data
         )));
         break;
       default:
@@ -93,7 +102,8 @@ export function createChangeLogHandler(cds: any, db: any) {
     await saveChangeLog();
 
     if (batches.length > 0) { await Promise.all(batches); }
+  }
 
-    return next();
-  };
+  return changeLogHandler;
+
 }

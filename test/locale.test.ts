@@ -28,7 +28,7 @@ describe('Locale Test Suite', () => {
 
     const logs = await queryChangeLogsByID({ entityName: { in: ["Book", "Book.texts"] }, entityKey, })
 
-    expect(logs).toHaveLength(4)
+    expect(logs).toHaveLength(5)
 
     expect(logs).toMatchObject([
       {
@@ -76,6 +76,20 @@ describe('Locale Test Suite', () => {
             attributeKey: "Name",
             attributeNewValue: "老人与海 (New)",
             attributeOldValue: "老人与海",
+          },
+        ],
+      },
+      {
+        entityName: "Book.texts",
+        locale: "zh_CN",
+        action: "Delete",
+        actionBy: "anonymous",
+        Items: [
+          {
+            sequence: 0,
+            attributeKey: "Name",
+            attributeNewValue: null,
+            attributeOldValue: "老人与海 (New)",
           },
         ],
       },

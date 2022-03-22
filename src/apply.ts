@@ -18,7 +18,7 @@ export function applyChangeLog(cds: any) {
 
       const db = await cds.connect.to("db");
       
-      db.prepend((srv: any) => srv.on(
+      db.prepend((srv: any) => srv.before(
         ["CREATE", "UPDATE", "DELETE"],
         extractChangeLogAwareEntities(cds),
         createChangeLogHandler(cds, db)

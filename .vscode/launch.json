@@ -12,7 +12,8 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
-      "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }
