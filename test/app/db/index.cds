@@ -88,21 +88,29 @@ entity Address : cuid {
 
   changeLogs : Association to many common.ChangeLog
                  on (
-                      changeLogs.entityName = 'Address'
-                   or changeLogs.entityName = 'Address.Detail'
+                       changeLogs.entityName = 'Address'
+                   and changeLogs.entityKey  = $self.ID
                  )
-                 and (
-                      changeLogs.entityKey           = $self.ID
-                   or changeLogs.entityRelation.UUID = $self.ID
+                 or (
+                       changeLogs.entityName          = 'Address.Detail'
+                   and changeLogs.entityRelation.UUID = $self.ID
                  )
 }
 
 @cds.changelog.enabled
 entity Address.Detail : cuid {
 
-  key parent : Association to one Address;
+  key parent     : Association to one Address;
       @cds.changelog.enabled
-      Line1  : String(255);
+      Line1      : String(255);
       @cds.changelog.enabled
-      Line2  : String(255);
+      Line2      : String(255);
+
+      changeLogs : Association to many common.ChangeLog
+                     on (
+                           changeLogs.entityName = 'Address.Detail'
+                       and changeLogs.entityKey  = $self.ID
+                     )
+
+
 }
