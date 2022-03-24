@@ -1,5 +1,5 @@
 
-import { queryChangeLogsByID, setupIgnoreStatus, setupTest } from "./utils";
+import { queryChangeLogs, setupIgnoreStatus, setupTest } from "./utils";
 
 
 describe('Locale Test Suite', () => {
@@ -26,7 +26,7 @@ describe('Locale Test Suite', () => {
     response = await axios.delete(`/sample/Books(${entityKey})`)
     expect(response.status).toBe(204)
 
-    const logs = await queryChangeLogsByID({ entityName: { in: ["Book", "Book.texts"] }, entityKey, })
+    const logs = await queryChangeLogs({ entityName: { in: ["Book", "Book.texts"] }, entityKey, })
 
     expect(logs).toHaveLength(5)
 

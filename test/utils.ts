@@ -26,7 +26,7 @@ export const setupTest = (...path: Array<string>): AxiosInstance => {
 }
 
 
-export const queryChangeLogsByID = (where: { entityName: any, entityKey: string, [key: string]: any }): Promise<Array<any>> => {
+export const queryChangeLogs = (where: { entityName: any, entityKey?: string, [key: string]: any }): Promise<Array<any>> => {
   const cds = require("@sap/cds")
   return cds.run(
     cds.ql.SELECT

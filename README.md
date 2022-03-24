@@ -30,11 +30,14 @@ module.exports = cds.server
 - **MUST** have at least one PRIMARY KEY
 
 ```groovy
-using from 'cds-change-log'
+using {cap.community.common} from 'cds-change-log'
 
-entity People : cuid, managed {
-  Name : String(255);
-  Age  : Integer;
+entity People : cuid, managed, customManaged {
+  Name       : String(255);
+  Age        : Integer;
+  changeLogs : Association to many common.ChangeLog
+                 on  changeLogs.entityKey  = $self.ID
+                 and changeLogs.entityName = 'People';
 }
 
 // mark in entity and field elements level
@@ -168,33 +171,6 @@ entity PeopleOrderForProduct {
 }
 ```
 
-
-### Mixin
-
-> support associate to `ChangeLogs` in root entity
-
-```groovy
-using {cap.community.common} from 'cds-change-log';
-
-@path : '/sample'
-service SampleService {
-
-  @readonly
-  view PeopleWithChangeLog as
-    select from People
-    mixin {
-      changeLogs : Association to many common.ChangeLog
-                     on  People.ID             = changeLogs.entityKey
-                     and changeLogs.entityName = 'People'
-    }
-    into {
-      *,
-      changeLogs
-    };
-
-}
-```
-
 ## Features
 
 - [x] single `CUD` OData requests 
@@ -209,7 +185,7 @@ service SampleService {
 - [ ] benchmark test
 - [ ] validation at startup
 - [ ] secondary storage like mongo/s3
-- [ ] readable identifier support `@title`/`@description`
+- [ ] readable identifier support
 - [ ] association/composition support
 - [ ] Samples
   - [ ] localized data sample

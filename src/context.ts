@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
-import { ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET, ENTITIES } from "./constants";
-import { extractKeyNamesFromEntity, isLocalizedEntityDef } from "./entity";
+import { ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_ASSOCIATION, ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_TYPE, ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET, ENTITIES } from "./constants";
+import { extractKeyNamesFromEntity, isAssociationKey, isLocalizedEntityDef } from "./entity";
 import { ChangeLogError } from "./error";
+import { ElementDefinition, EntityDefinition } from "./type";
 
 export type KeyMapping = Array<[changeLogElementKey: string, targetEntityKey: string]>;
 
@@ -12,22 +13,31 @@ export class ChangeLogContext {
   /**
    * change log model definition
    */
-  #changeLogDef: any;
+  #changeLogDef: EntityDefinition;
 
   /**
    * key mapping cache
    */
   #keyMappingCache: WeakMap<object, KeyMapping> = new WeakMap();
 
-  constructor(changeLogDef: any) {
+  constructor(changeLogDef: EntityDefinition) {
     this.#changeLogDef = changeLogDef;
   }
 
   public findKeyByType(type: string) {
     return Object
-      .entries(this.#changeLogDef?.elements ?? {})
-      .find(([_, element]) => (element as any)?.["@cds.changelog.extension.for.type"]?.["="] === type)
-      ?.[0];
+      .values(this.#changeLogDef?.elements ?? {})
+      .filter((element: ElementDefinition) => element[ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_ASSOCIATION] !== true)
+      .find((element: ElementDefinition) => (element?.[ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_TYPE]?.["="] === type))
+      ?.name;
+  }
+
+  public findAssociationKeyByType(type: string) {
+    return Object
+      .values(this.#changeLogDef?.elements ?? {})
+      .filter((element: ElementDefinition) => element[ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_ASSOCIATION] === true)
+      .find((element: ElementDefinition) => (element?.[ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_TYPE]?.["="] === type))
+      ?.name;
   }
 
   /**
@@ -36,7 +46,7 @@ export class ChangeLogContext {
    * @param targetEntityElement 
    * @returns 
    */
-  public findKeyName(targetEntityElement: any) {
+  public findKeyName(targetEntityElement: ElementDefinition) {
     if (ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET in targetEntityElement) {
       const changelogElementName = targetEntityElement[ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET];
       const changeLogElement = this.#changeLogDef.elements[changelogElementName];
@@ -47,6 +57,9 @@ export class ChangeLogContext {
         throw new ChangeLogError(`element '${changelogElementName}' type should be '${targetEntityElement.type}'`);
       }
       return changelogElementName;
+    }
+    if (isAssociationKey(targetEntityElement)) {
+      return this.findAssociationKeyByType(targetEntityElement.type);
     }
     return this.findKeyByType(targetEntityElement.type);
   }

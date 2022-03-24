@@ -19,6 +19,16 @@ type Action : String enum {
   Delete;
 };
 
+/**
+ * the structure to store the association/composition keys for
+ * target entity
+ */
+type EntityRelationKeys : {
+  @cds.changelog.extension.for.association
+  @cds.changelog.extension.for.type : cds.UUID
+  UUID : cds.UUID;
+}
+
 
 /**
  * the `ChangeLog` table, used to store change log data
@@ -34,30 +44,35 @@ entity ChangeLog : cuid {
    * it will be raw CDS Entity Name (with namespace), will not
    * save the projection/view data
    */
-  entityName : CommonString not null;
+  entityName     : CommonString not null;
 
   /**
    * default key storage for common model
    */
-  @cds.changelog.extension.entityKey
-  @cds.changelog.extension.for.type :         cds.UUID
-  entityKey  : UUID;
+  @cds.changelog.extension.entityKey :            true
+  @cds.changelog.extension.for.type  :            cds.UUID
+  entityKey      : UUID;
+
+  /**
+   * storage for entity associations
+   */
+  entityRelation : EntityRelationKeys;
   /**
    * locale
    */
-  locale     : String(14);
+  locale         : String(14);
   /**
    * changed action
    */
-  action     : Action not null;
+  action         : Action not null;
   /**
    * log at timestamp
    */
-  actionAt   : cds.Timestamp @cds.on.insert : $now;
+  actionAt       : cds.Timestamp @cds.on.insert : $now;
   /**
    * log by user id
    */
-  actionBy   : String(255)   @cds.on.insert : $user;
+  actionBy       : String(255)   @cds.on.insert : $user;
 
   /**
    * details of changed value
@@ -65,8 +80,8 @@ entity ChangeLog : cuid {
    * it will be empty if no value changed or there is no
    * annotated elements
    */
-  Items      : Composition of many ChangeLog.Item
-                 on Items.Parent = $self;
+  Items          : Composition of many ChangeLog.Item
+                     on Items.Parent = $self;
 }
 
 entity ChangeLog.Item { // do not need the user info because header level has that

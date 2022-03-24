@@ -14,7 +14,7 @@ export function createChangeLogHandler(cds: any, db: any) {
   const { INSERT, SELECT } = cds.ql;
   const context = new ChangeLogContext(cds.model.definitions[ENTITIES.CHANGELOG]);
 
-  const { hasDeepDelete, getDeepDeleteCQNs } = cwdRequire("@sap/cds/libx/_runtime/common/composition");
+  const compositions = cwdRequire("@sap/cds/libx/_runtime/common/composition");
   const { getFlatArray } = cwdRequire("@sap/cds/libx/_runtime/db/utils/deep");
 
   async function changeLogHandler(req: { query: CQN, event: string, data?: any }) {
@@ -71,12 +71,18 @@ export function createChangeLogHandler(cds: any, db: any) {
 
     switch (req.event) {
       case "CREATE":
-        const data: Array<any> = req.data instanceof Array ? req.data : [req.data];
-        data.forEach(change => queueChangeLog(buildChangeLog(entityDef, context, undefined, change)));
+        if (compositions.hasDeepInsert(cds.model, query)) {
+          const insertions = compositions.getDeepInsertCQNs(cds.model, query);
+          for (const insertion of insertions) {
+            await changeLogHandler({ query: insertion, event: "CREATE" });
+          };
+        } else {
+          (query.INSERT.entries ?? []).forEach((change: any) => queueChangeLog(buildChangeLog(entityDef, context, undefined, change)));
+        }
         break;
       case "DELETE":
-        if (hasDeepDelete(cds.model, query)) {
-          const deletions = getFlatArray(await getDeepDeleteCQNs(cds.model, req)).filter((cqn: CQN) => cqn !== query);
+        if (compositions.hasDeepDelete(cds.model, query)) {
+          const deletions = getFlatArray(await compositions.getDeepDeleteCQNs(cds.model, req)).filter((cqn: CQN) => cqn !== query);
           for (const deletion of deletions) {
             await changeLogHandler({ query: deletion, event: "DELETE" });
           }

@@ -2,14 +2,17 @@ using {
   cuid,
   managed
 } from '@sap/cds/common';
-using from '../../../index.cds';
+using {cap.community.common} from '../../../index.cds';
 using customManaged from './common';
 using from './extend';
 
 
 entity People : cuid, managed, customManaged {
-  Name : String(255);
-  Age  : Integer;
+  Name       : String(255);
+  Age        : Integer;
+  changeLogs : Association to many common.ChangeLog
+                 on  changeLogs.entityKey  = $self.ID
+                 and changeLogs.entityName = 'People';
 }
 
 
@@ -74,4 +77,32 @@ entity Order4Item : cuid {
   order  : Association to one Order4;
   @cds.changelog.enabled
   Amount : Decimal;
+}
+
+@cds.changelog.enabled
+entity Address : cuid {
+  @cds.changelog.enabled
+  Name       : String(255);
+  details    : Composition of many Address.Detail
+                 on details.parent = $self;
+
+  changeLogs : Association to many common.ChangeLog
+                 on (
+                      changeLogs.entityName = 'Address'
+                   or changeLogs.entityName = 'Address.Detail'
+                 )
+                 and (
+                      changeLogs.entityKey           = $self.ID
+                   or changeLogs.entityRelation.UUID = $self.ID
+                 )
+}
+
+@cds.changelog.enabled
+entity Address.Detail : cuid {
+
+  key parent : Association to one Address;
+      @cds.changelog.enabled
+      Line1  : String(255);
+      @cds.changelog.enabled
+      Line2  : String(255);
 }
