@@ -1,14 +1,15 @@
+import type { AxiosInstance } from "axios";
+
+// TODO: minimal CAP abstract type definition
 
 
 /**
  * entity definition type
  */
 export interface EntityDefinition extends Definition {
-  elements: Array<ElementDefinition>;
-  keys: Array<ElementDefinition>;
-  isAssociation?: boolean;
+  elements: { [elementName: string]: ElementDefinition };
+  keys: { [elementName: string]: ElementDefinition };
 }
-
 
 /**
  * element definition type
@@ -16,8 +17,8 @@ export interface EntityDefinition extends Definition {
 export interface ElementDefinition extends Definition {
   parent: EntityDefinition;
   key: boolean;
+  isAssociation?: boolean;
 }
-
 
 export interface Definition {
   kind: string;
@@ -26,15 +27,66 @@ export interface Definition {
   [annotationKey: string]: any;
 }
 
+type LogFunction = (...messages: Array<any>) => void
+
+export interface Logger {
+  trace: LogFunction;
+  debug: LogFunction;
+  info: LogFunction;
+  warn: LogFunction;
+  error: LogFunction;
+}
+
+export interface Service {
+
+  prepend(cb: (srv: this) => void): void;
+
+  before(cb: Function): void;
+  before(event: string | Array<string>, cb: Function): void;
+  before(event: string | Array<string>, entity: string | Definition | Array<Definition>, cb: Function): void;
+
+  on(cb: Function): void;
+  on(event: string | Array<string>, cb: Function): void;
+  on(event: string | Array<string>, entity: string | Definition | Array<Definition>, cb: Function): void;
+
+  after(cb: Function): void;
+  after(event: string | Array<string>, cb: Function): void;
+  after(event: string | Array<string>, entity: string | Definition | Array<Definition>, cb: Function): void;
+
+}
+
+type Methods = "get" | "post" | "patch" | "delete" | "put";
+
+export interface TestFacade extends Pick<AxiosInstance, Methods> {
+  axios: AxiosInstance
+}
+
 export interface CDS {
+  on: (event: string, cb: Function) => void;
+  log: (module: string) => Logger;
+  connect: {
+    to: (...args: Array<any>) => Promise<Service>;
+  };
   model: {
     definitions: {
       [key: string]: Definition;
     }
-  }
+  };
+  test: (project: string) => { in: (...path: Array<string>) => TestFacade };
+  ql: {
+    SELECT: any;
+    INSERT: any;
+    UPDATE: any;
+    DELETE: any;
+  };
 }
 
 /**
  * CQN query type
  */
-export type CQN = any
+export type CQN = {
+  SELECT: any,
+  INSERT: any,
+  UPDATE: any,
+  DELETE: any,
+}

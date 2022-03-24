@@ -1,5 +1,6 @@
 import type { AxiosInstance } from "axios";
 import { ENTITIES } from "../src/constants";
+import { CDS } from "../src/type";
 
 /**
  * setup a global test user with HTTP basic auth
@@ -18,9 +19,8 @@ export const setupIgnoreStatus = (axios: any) => {
   return axios
 }
 
-
 export const setupTest = (...path: Array<string>): AxiosInstance => {
-  const cds = require("@sap/cds") as any
+  const cds = require("@sap/cds") as CDS
   const { axios } = cds.test(".").in(...path)
   return axios
 }

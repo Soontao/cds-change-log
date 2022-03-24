@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE } from "./constants";
-import { CDS, ElementDefinition, EntityDefinition } from "./type";
+import { CDS, Definition, ElementDefinition, EntityDefinition } from "./type";
 import { cwdRequire, memorized } from "./utils";
 
 const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
@@ -13,8 +13,8 @@ const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
  * 
  * @param def
  */
-export const isRawEntity = memorized((def: any): def is EntityDefinition => {
-  if (def !== undefined && def?.kind === "entity" && def?.query === undefined && def.projection === undefined) {
+export const isRawEntity = memorized((def: Definition): def is EntityDefinition => {
+  if (def !== undefined && def?.kind === "entity" && def?.query === undefined && def?.projection === undefined) {
     return true;
   }
   return false;
@@ -105,15 +105,14 @@ export const extractChangeAwareLocalizedElements = memorized((entityDef: EntityD
  * @param entityDef 
  * @returns 
  */
-export const extractChangeAwareElements = memorized((entityDef: EntityDefinition): Array<any> => {
+export const extractChangeAwareElements = memorized((entityDef: EntityDefinition) => {
   return Object
-    .entries(entityDef?.elements)
-    .filter((entry: any[]) =>
-      entry[1]?.[ANNOTATE_CHANGELOG_ENABLED] === true &&
-      entry[1]?.key !== true && // ignore key
-      !IGNORED_TYPES.includes(entry[1].type)
-    )
-    .map(entry => entry[1]);
+    .values(entityDef?.elements)
+    .filter((elementDef) =>
+      elementDef[ANNOTATE_CHANGELOG_ENABLED] === true &&
+      elementDef.key !== true && // ignore key
+      !IGNORED_TYPES.includes(elementDef.type)
+    );
 });
 
 /**
@@ -125,7 +124,7 @@ export function isChangeLogInternalEntity(name: string = "") {
   return name.startsWith(CHANGELOG_NAMESPACE);
 }
 
-export function extractChangeLogAwareEntities(cds: CDS): Array<any> {
+export function extractChangeLogAwareEntities(cds: CDS) {
   return Object
     .values(cds.model.definitions)
     .filter(isRawEntity)
