@@ -182,6 +182,7 @@ entity PeopleOrderForProduct {
   - [x] metadata cache
 - [x] multi primary key support
 - [x] extension field support
+- [ ] save change logs in async mode
 - [ ] benchmark test
 - [ ] validation at startup
 - [ ] secondary storage like mongo/s3
