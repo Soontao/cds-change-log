@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/Soontao/cds-change-log/compare/v0.0.5...v0.0.6) (2022-04-04)
+
+
+### Features
+
+* cache ([a8ac96e](https://github.com/Soontao/cds-change-log/commit/a8ac96e59ce92d41ab8c279f34459faad481d66d))
+* deep deletion for composition ([89fd4e3](https://github.com/Soontao/cds-change-log/commit/89fd4e37cf45b97554018edc5f39e8ca0ed3ecca))
+* optimization handler registration ([7e5867e](https://github.com/Soontao/cds-change-log/commit/7e5867ea197a4ab424fdf3ecdc9ceb0518155c0b))
+* partial support composition/association insert ([ed53a35](https://github.com/Soontao/cds-change-log/commit/ed53a350598a24fdee0926b978c55a930115e1e1))
+
 ### [0.0.5](https://github.com/Soontao/cds-change-log/compare/v0.0.4...v0.0.5) (2022-03-21)
 
 
