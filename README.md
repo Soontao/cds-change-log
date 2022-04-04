@@ -182,9 +182,12 @@ entity PeopleOrderForProduct {
   - [x] metadata cache
 - [x] multi primary key support
 - [x] extension field support
+- [ ] draft mode (`draftActivate`)
+- [ ] built-in FE UI Annotations
 - [ ] save change logs in async mode
 - [ ] benchmark test
 - [ ] validation at startup
+- [ ] skip/warn log for `Blob`
 - [ ] secondary storage like mongo/s3
 - [ ] readable identifier support
 - [ ] association/composition support
