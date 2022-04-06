@@ -1,4 +1,4 @@
-name: node-test
+name: node-lint
 
 on:
   push:
@@ -7,18 +7,16 @@ on:
   pull_request:
     branches:
       - "*"
-  schedule:
-    - cron: "13 6 * * *"
 
 jobs:
-  build:
+  lint:
     runs-on: ${{ matrix.os }}
 
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [16.x]
         os: [ubuntu-latest]
 
     steps:
@@ -40,19 +38,13 @@ jobs:
           cache-name: cache-node-modules
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-lint-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: npm install
-        run: npm install
+      - name: npm ci
+        run: npm ci
         env:
           CI: true
 
       - run: npm i --no-save @sap/cds@5 express sqlite3
 
-      - run: npm run build --if-present
-
-      - name: test & coverage
-        run: npm run coverage
-
-      - name: upload coverage
-        uses: codecov/codecov-action@v1
+      - run: npm run lint
