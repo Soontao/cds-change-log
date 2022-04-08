@@ -189,6 +189,7 @@ entity PeopleOrderForProduct {
 - [ ] built-in FE UI Annotations
 - [ ] save change logs in async mode
 - [ ] benchmark test
+- [ ] subscribe change log event
 - [ ] validation at startup
 - [ ] skip/warn log for `Blob`
 - [ ] secondary storage like mongo/s3
