@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_ASSOCIATION, ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_TYPE, ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET, ANNOTATE_CHANGELOG_TO, ENTITIES } from "./constants";
-import { extractKeyNamesFromEntity, isChangeLogEnabled, isLocalizedEntityDef } from "./entity";
+import { ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_ASSOCIATION, ANNOTATE_CHANGELOG_EXTENSION_KEY_FOR_TYPE, ANNOTATE_CHANGELOG_EXTENSION_KEY_TARGET, ENTITIES } from "./constants";
+import { extractKeyNamesFromEntity, isLocalizedEntityDef } from "./entity";
 import { ChangeLogError } from "./error";
 import { ElementDefinition, EntityDefinition, LinkedCSN } from "./type";
 
@@ -107,81 +107,5 @@ export class ChangeLogContext {
         return pre;
       }, {});
   }
-
-  private resolveEntityByPath(target: string | Array<string>, context: EntityDefinition): Array<EntityDefinition> {
-    const [part0, ...parts] = typeof target === "string" ? target.split(".") : target;
-
-    let nextEntity = undefined;
-
-    // TODO: only 2one association support
-    if (context.associations !== undefined && part0 in context.associations) {
-      nextEntity = context.associations[part0]._target;
-    }
-    if (context.compositions !== undefined && part0 in context.compositions) {
-      nextEntity = context.compositions[part0]._target;
-    }
-    if (nextEntity === undefined) {
-      throw new Error(`navigation '${part0}' is not existed on entity '${context.name}'`);
-    }
-
-    if (parts.length > 0) {
-      const entities = this.resolveEntityByPath(parts, nextEntity);
-      return [context, ...entities];
-    }
-
-    return [context, nextEntity];
-
-  }
-
-  /**
-   * extract relation context for entity 
-   * 
-   * @param targetEntityDef 
-   * @returns 
-   */
-  public extractRelContext(targetEntityDef: EntityDefinition): Array<{ context: string | null, entityName: string, expand?: string }> {
-    // TODO: cache
-    if (isChangeLogEnabled(targetEntityDef)) {
-      
-      if (ANNOTATE_CHANGELOG_TO in targetEntityDef) {
-        let topics: Array<any> = targetEntityDef[ANNOTATE_CHANGELOG_TO];
-
-        if (!(topics instanceof Array)) { topics = [topics]; }
-
-        return topics.map(v => v["="]).map((name: string) => {
-          if (name === "$self") {
-            return {
-              context: null,
-              entityName: targetEntityDef.name,
-            };
-          }
-
-          const entities = this.resolveEntityByPath(name, targetEntityDef);
-
-          const path = entities.map(entity => entity.name).reverse().join("/");
-
-          // TODO: check associations
-          return {
-            context: path,
-            expand: name,
-            entityName: entities.reverse()[0].name,
-          };
-
-        });
-
-      }
-
-      return [
-        {
-          context: null,
-          entityName: targetEntityDef.name,
-        }
-      ];
-    }
-
-    return [];
-
-  }
-
 
 }
