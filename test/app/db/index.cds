@@ -114,3 +114,15 @@ entity Address.Detail : cuid {
 
 
 }
+
+@cds.changelog.enabled
+entity Form : cuid {
+  @cds.changelog.enabled
+  f1 : String(255);
+  @cds.changelog.enabled
+  f2 : String(255);
+  @cds.changelog.enabled
+  f3 : Integer;
+  @cds.changelog.enabled
+  f4 : Decimal;
+}

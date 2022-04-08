@@ -6,7 +6,8 @@ using {
   PeopleOrderForProduct,
   Order3,
   Book,
-  Address
+  Address,
+  Form
 } from '../db';
 using {cap.community.common} from '../../../index.cds';
 
@@ -27,6 +28,10 @@ service SampleService {
   entity PeopleOrderForProducts as projection on PeopleOrderForProduct;
   entity Books                  as projection on Book;
   entity Addresses              as projection on Address;
+
+  @fiori.draft.enabled
+  entity Forms                  as projection on Form;
+
 
   @readonly
   view PeopleWithChangeLog as
