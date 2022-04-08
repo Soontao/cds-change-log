@@ -183,6 +183,8 @@ entity PeopleOrderForProduct {
 - [x] multi primary key support
 - [x] extension field support
 - [ ] draft mode (`draftActivate`)
+  - [x] simple single entity
+  - [ ] localization
 - [ ] built-in FE UI Annotations
 - [ ] save change logs in async mode
 - [ ] benchmark test
