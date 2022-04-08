@@ -1,6 +1,14 @@
 {
   "name": "test-app",
   "cds": {
+    "requires": {
+      "db": {
+        "kind": "sql"
+      },
+      "hana": {
+        "deploy-format": "hdbtable"
+      }
+    },
     "i18n": {
       "for_sql": [
         "en",

@@ -29,9 +29,8 @@ service SampleService {
   entity Books                  as projection on Book;
   entity Addresses              as projection on Address;
 
-  @fiori.draft.enabled
+  @odata.draft.enabled
   entity Forms                  as projection on Form;
-
 
   @readonly
   view PeopleWithChangeLog as
