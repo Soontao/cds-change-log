@@ -91,13 +91,13 @@ entity Address : cuid {
                        changeLogs.entityName = 'Address'
                    and changeLogs.entityKey  = $self.ID
                  )
-                 or (
-                       changeLogs.entityName          = 'Address.Detail'
-                   and changeLogs.entityRelation.UUID = $self.ID
-                 )
 }
 
 @cds.changelog.enabled
+@cds.changelog.to : [
+  parent,
+  $self,
+]
 entity Address.Detail : cuid {
 
   key parent     : Association to one Address;

@@ -27,9 +27,7 @@ export const isRawEntity = memorized((def: Definition): def is EntityDefinition 
  */
 export const isChangeLogEnabled = memorized((def: EntityDefinition) => {
   if (def !== undefined && !isChangeLogInternalEntity(def?.name)) {
-    if (ANNOTATE_CHANGELOG_ENABLED in def && def[ANNOTATE_CHANGELOG_ENABLED] === true) {
-      return true;
-    }
+    return extractChangeAwareElements(def).length > 0;
   }
   return false;
 });
@@ -90,17 +88,18 @@ export const isLocalizedEntityDef = memorized((entityDef: EntityDefinition) => {
  * @returns 
  */
 export const extractChangeAwareLocalizedElements = memorized((entityDef: EntityDefinition): Array<any> => {
-  return Object
-    .entries(entityDef?.elements)
-    .filter((entry: any[]) =>
-      entry[1]?.[ANNOTATE_CHANGELOG_ENABLED] === true &&
-      entry[1]?.localized === true &&
-      !IGNORED_TYPES.includes(entry[1].type)
-    )
-    .map(entry => entry[1]);
+  return extractChangeAwareElements(entityDef)
+    .filter((elementDef) =>
+      elementDef[ANNOTATE_CHANGELOG_ENABLED] === true &&
+      elementDef.key !== true &&
+      elementDef.localized === true &&
+      !IGNORED_TYPES.includes(elementDef.type)
+    );
 });
 
 /**
+ * find all elements which annotated with `@cds.changelog.enabled`
+ * 
  * @scope server
  * @param entityDef 
  * @returns 

@@ -20,28 +20,12 @@ type Action : String enum {
 };
 
 /**
- * the structure to store the association/composition keys for
- * target entity
- */
-type EntityRelationKeys : {
-
-  @cds.changelog.extension.for.association
-  @cds.changelog.extension.for.type : cds.UUID
-  UUID    : cds.UUID;
-
-  @cds.changelog.extension.for.association
-  @cds.changelog.extension.for.type : cds.Integer
-  Integer : cds.Integer;
-
-}
-
-
-/**
  * the `ChangeLog` table, used to store change log data
  */
 @readonly
 @cds.autoexpose
 entity ChangeLog : cuid {
+
 
   /**
    * root entity (Database Table Entity) name, not
@@ -63,10 +47,6 @@ entity ChangeLog : cuid {
   @cds.changelog.extension.for.type  :              cds.Integer
   entityKeyInteger : Integer;
 
-  /**
-   * storage for entity associations
-   */
-  entityRelation   : EntityRelationKeys;
   /**
    * locale
    */
@@ -123,8 +103,8 @@ entity ChangeLog.Item { // do not need the user info because header level has th
  */
 view ChangeLogsItemsView as
   select from ChangeLog.Item {
-    key sequence                      as ChangeSequence,
-    key Parent.ID                     as LogID,
+    key sequence         as ChangeSequence,
+    key Parent.ID        as LogID,
         Parent.action,
         Parent.actionAt,
         Parent.actionBy,
@@ -133,53 +113,61 @@ view ChangeLogsItemsView as
         attributeNewValue,
         attributeOldValue,
         Parent.entityName,
-        Parent.entityKey              as entityKeyUUID,
+        Parent.entityKey as entityKeyUUID,
         Parent.entityKeyInteger,
-        Parent.entityRelation.UUID    as relationKeyUUID,
-        Parent.entityRelation.Integer as relationKeyInteger,
   };
 
 
-annotate ChangeLogsItems with @(UI : {LineItem : [
-  {
-    Value                 : attributeKey,
-    Label                 : 'i18n>attributeKey',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-  {
-    Value                 : attributeOldValue,
-    Label                 : 'i18n>attributeOldValue',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-  {
-    Value                 : attributeNewValue,
-    Label                 : 'i18n>attributeNewValue',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-  {
-    Value                 : actionBy,
-    Label                 : 'i18n>actionBy',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-  {
-    Value                 : entityName,
-    Label                 : 'i18n>actionBy',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-  {
-    Value                 : locale,
-    Label                 : 'i18n>locale',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
+annotate ChangeLogsItemsView with @(UI : {
+  LineItem            : [
+    {
+      Value                 : attributeKey,
+      Label                 : '{i18n>attributeKey}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+    {
+      Value                 : attributeOldValue,
+      Label                 : '{i18n>attributeOldValue}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+    {
+      Value                 : attributeNewValue,
+      Label                 : '{i18n>attributeNewValue}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+    {
+      Value                 : actionBy,
+      Label                 : '{i18n>actionBy}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+    {
+      Value                 : entityName,
+      Label                 : '{i18n>entityName}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+    {
+      Value                 : locale,
+      Label                 : '{i18n>locale}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
 
+    },
+    {
+      Value                 : ![action],
+      Label                 : '{i18n>action}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+    {
+      Value                 : actionAt,
+      Label                 : '{i18n>actionAt}',
+      ![@HTML5.CssDefaults] : {width : '10rem'},
+    },
+  ],
+  PresentationVariant : {
+    $Type     : 'UI.PresentationVariantType',
+    SortOrder : [{
+      $Type      : 'Common.SortOrderType',
+      Property   : actionAt,
+      Descending : true,
+    }]
   },
-  {
-    Value                 : ![action],
-    Label                 : 'i18n>action',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-  {
-    Value                 : actionAt,
-    Label                 : 'i18n>actionAt',
-    ![@HTML5.CssDefaults] : {width : '10rem'},
-  },
-]});
+});

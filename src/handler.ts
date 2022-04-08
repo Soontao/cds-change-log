@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { buildChangeLog } from "./changeLog";
+import { buildChangeLog } from "./change";
 import { ENTITIES } from "./constants";
 import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements, extractKeyNamesFromEntity } from "./entity";
@@ -12,7 +12,7 @@ import { cwdRequire } from "./utils";
 export function createChangeLogHandler(cds: any, db: any) {
 
   const { INSERT, SELECT } = cds.ql;
-  const context = new ChangeLogContext(cds.model.definitions[ENTITIES.CHANGELOG]);
+  const context = new ChangeLogContext(cds.model);
 
   const compositions = cwdRequire("@sap/cds/libx/_runtime/common/composition");
   const { getFlatArray } = cwdRequire("@sap/cds/libx/_runtime/db/utils/deep");
@@ -32,7 +32,7 @@ export function createChangeLogHandler(cds: any, db: any) {
       throw new ChangeLogError(`entity '${entityName}' must have at least one primary key for change log`);
     }
 
-    let queuedChangeLogs: Array<any> = [];
+    let queuedChangeLogs: Array<Array<any>> = [];
 
     const batches: Array<Promise<void>> = [];
 
@@ -41,15 +41,15 @@ export function createChangeLogHandler(cds: any, db: any) {
      *
      * @param log
      */
-    const queueChangeLog = async (log: any) => {
+    const queueChangeLogs = (log: any) => {
       queuedChangeLogs.push(log);
-      if (queuedChangeLogs.length >= 100) { await saveChangeLog(); }
+      if (queuedChangeLogs.length >= 100) { saveChangeLog(); }
     };
 
     /**
      * save change log to the database
      */
-    const saveChangeLog = async () => {
+    const saveChangeLog = () => {
       if (queuedChangeLogs.length > 0) {
         const [...tmpChangeLogs] = queuedChangeLogs;
         queuedChangeLogs = [];
@@ -62,7 +62,9 @@ export function createChangeLogHandler(cds: any, db: any) {
     };
 
     // query for UPDATE/DELETE
-    const originalDataQuery = SELECT.from(entity).columns(...entityPrimaryKeys, ...entityChangeLogElementKeys);
+    const originalDataQuery = SELECT
+      .from(entity)
+      .columns(...entityPrimaryKeys, ...entityChangeLogElementKeys);
 
     const where = query?.DELETE?.where ?? query?.UPDATE?.where;
 
@@ -77,7 +79,7 @@ export function createChangeLogHandler(cds: any, db: any) {
             await changeLogHandler({ query: insertion, event: "CREATE" });
           };
         } else {
-          (query.INSERT.entries ?? []).forEach((change: any) => queueChangeLog(buildChangeLog(entityDef, context, undefined, change)));
+          (query.INSERT.entries ?? []).forEach((change: any) => queueChangeLogs(buildChangeLog(entityDef, context, undefined, change)));
         }
         break;
       case "DELETE":
@@ -87,14 +89,14 @@ export function createChangeLogHandler(cds: any, db: any) {
             await changeLogHandler({ query: deletion, event: "DELETE" });
           }
         }
-        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(buildChangeLog(
+        await db.foreach(originalDataQuery, (original: any) => queueChangeLogs(buildChangeLog(
           entityDef,
           context,
           original,
         )));
         break;
       case "UPDATE":
-        await db.foreach(originalDataQuery, (original: any) => queueChangeLog(buildChangeLog(
+        await db.foreach(originalDataQuery, (original: any) => queueChangeLogs(buildChangeLog(
           entityDef,
           context,
           original,
@@ -105,7 +107,7 @@ export function createChangeLogHandler(cds: any, db: any) {
         break;
     }
 
-    await saveChangeLog();
+    saveChangeLog();
 
     if (batches.length > 0) { await Promise.all(batches); }
   }

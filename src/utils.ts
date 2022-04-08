@@ -46,3 +46,13 @@ export const memorized = <T extends (arg0: any) => any>(func: T): T => {
     return cache.get(arg0);
   };
 };
+
+export const get = (object: any, path: string) => {
+  for (const part of path.split(".")) {
+    object = object[part];
+    if (object === undefined) {
+      break;
+    }
+  }
+  return object;
+};

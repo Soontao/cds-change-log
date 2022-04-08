@@ -21,14 +21,11 @@ export const buildChangeLog = (
   context: ChangeLogContext,
   original?: any,
   change?: any,
-): Promise<any> => {
+): Array<any> => {
 
   if (original === undefined && change === undefined) {
     throw new TypeError("require original data or change data at least");
   }
-  const entityName = entityDef.name;
-  const entityElements = extractChangeAwareElements(entityDef);
-
   const cds = cwdRequire("@sap/cds");
   const defaultLocale = cds?.env?.i18n?.default_language ?? "en";
 
@@ -44,14 +41,13 @@ export const buildChangeLog = (
     action = ACTIONS.Update;
   }
 
-  // support multi keys
-  const keys = context
-    .extractKeyMappingFromEntity(entityDef)
-    .reduce((pre: any, cur) => {
-      const [changeLogKeyName, targetEntityKeyName] = cur;
-      pre[changeLogKeyName] = change?.[targetEntityKeyName] ?? original?.[targetEntityKeyName];
-      return pre;
-    }, {});
+  const entityElements = extractChangeAwareElements(entityDef);
+
+  const entityName = entityDef.name;
+
+  const keys = context.createKeyValuesForInstance(entityDef, original ?? change);
+
+  // TODO: concern about key change in some cases
 
   // normal raw elements
   const Items = entityElements
@@ -89,7 +85,6 @@ export const buildChangeLog = (
       item.sequence = idx;
       return item;
     });
-
 
   // TODO: check column keys
   return {

@@ -25,7 +25,7 @@ module.exports = cds.server
 `entity.cds`
 
 - **MUST** have `using from 'cds-change-log'` in CDS model
-- **MUST** annotating at both entity and field/element level
+- **MUST** annotating `@cds.changelog.enabled` on elements
 - **MUST** annotating at the root/raw `entity` level, annotations on `projection`/`view` will not work
 - **MUST** have at least one PRIMARY KEY
 
@@ -42,7 +42,7 @@ entity People : cuid, managed, customManaged {
 
 // mark in entity and field elements level
 // annotation in another place, you can put it into entity definition directly
-annotate People with @cds.changelog.enabled {
+annotate People with {
   Age  @cds.changelog.enabled;
   Name @cds.changelog.enabled;
 };
@@ -185,6 +185,7 @@ entity PeopleOrderForProduct {
 - [ ] draft mode (`draftActivate`)
   - [x] simple single entity
   - [ ] localization
+- [ ] key relation cache
 - [ ] built-in FE UI Annotations
 - [ ] save change logs in async mode
 - [ ] benchmark test
@@ -193,6 +194,7 @@ entity PeopleOrderForProduct {
 - [ ] secondary storage like mongo/s3
 - [ ] readable identifier support
 - [ ] association/composition support
+  - [ ] annotation `@cds.changelog.to`
 - [ ] Samples
   - [ ] localized data sample
   - [ ] for fiori elements

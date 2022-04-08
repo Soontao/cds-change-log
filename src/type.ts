@@ -3,10 +3,19 @@ import type { AxiosInstance } from "axios";
 // TODO: minimal CAP abstract type definition
 
 
+export interface AssociationDefinition extends Definition {
+  target: string;
+  _target: EntityDefinition;
+  is2one: boolean;
+  is2many: boolean;
+}
+
 /**
  * entity definition type
  */
 export interface EntityDefinition extends Definition {
+  associations?: { [elementName: string]: AssociationDefinition };
+  compositions?: { [elementName: string]: AssociationDefinition };
   elements: { [elementName: string]: ElementDefinition };
   keys: { [elementName: string]: ElementDefinition };
 }
@@ -24,6 +33,7 @@ export interface Definition {
   kind: string;
   type: string;
   name: string;
+  localized?: boolean;
   [annotationKey: string]: any;
 }
 
@@ -61,17 +71,27 @@ export interface TestFacade extends Pick<AxiosInstance, Methods> {
   axios: AxiosInstance
 }
 
+export interface LinkedCSN {
+
+  $version: string;
+  definitions: {
+    [key: string]: Definition;
+  };
+  exports: (ns: string) => any;
+  kind: "type";
+  meta?: {
+    creator?: string;
+    flavor?: string;
+  };
+}
+
 export interface CDS {
   on: (event: string, cb: Function) => void;
   log: (module: string) => Logger;
   connect: {
     to: (...args: Array<any>) => Promise<Service>;
   };
-  model: {
-    definitions: {
-      [key: string]: Definition;
-    }
-  };
+  model: LinkedCSN;
   test: (project: string) => { in: (...path: Array<string>) => TestFacade };
   ql: {
     SELECT: any;
