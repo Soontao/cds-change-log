@@ -16,13 +16,12 @@ entity People : cuid, managed, customManaged {
 }
 
 
-annotate People with @cds.changelog.enabled {
+annotate People with {
   Age  @cds.changelog.enabled;
   Name @cds.changelog.enabled;
 };
 
 
-@cds.changelog.enabled
 entity Order : managed {
   key ID     : Integer;
       @cds.changelog.enabled
@@ -41,14 +40,12 @@ entity PeopleOrderForProduct {
       Amount   : Decimal;
 }
 
-@cds.changelog.enabled
 entity Order3 {
   key ID     : Decimal;
       @cds.changelog.enabled
       Amount : Decimal;
 }
 
-@cds.changelog.enabled
 entity Order4 : cuid {
   @cds.changelog.enabled
   Items  : Association to many Order4Item
@@ -60,7 +57,6 @@ entity Order4 : cuid {
            }
 }
 
-@cds.changelog.enabled
 entity Book : cuid {
 
   @cds.changelog.enabled
@@ -71,7 +67,6 @@ entity Book : cuid {
 }
 
 
-@cds.changelog.enabled
 entity Order4Item : cuid {
   @cds.changelog.enabled
   order  : Association to one Order4;
