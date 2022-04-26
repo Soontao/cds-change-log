@@ -50,10 +50,13 @@ export const memorized = <T extends (arg0: any) => any>(func: T): T => {
 };
 
 export const get = (object: any, path: string) => {
-  for (const part of path.split(".")) {
-    object = object[part];
-    if (object === undefined) {
-      break;
+  if (path?.length > 0) {
+    for (const part of path.split(".")) {
+      if (object?.[part] !== undefined) {
+        object = object[part];
+      } else {
+        return undefined;
+      }
     }
   }
   return object;
