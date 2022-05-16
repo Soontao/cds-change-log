@@ -24,10 +24,10 @@ module.exports = cds.server
 
 `entity.cds`
 
-- **MUST** have `using from 'cds-change-log'` in CDS model
+- **MUST** `using from 'cds-change-log'` statement in CDS model
 - **MUST** annotating `@cds.changelog.enabled` on elements
 - **MUST** annotating at the root/raw `entity` level, annotations on `projection`/`view` will not work
-- **MUST** have at least one PRIMARY KEY
+- **MUST** have at least one **PRIMARY KEY**
 
 ```groovy
 using {cap.community.common} from 'cds-change-log'
