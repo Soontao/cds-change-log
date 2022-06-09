@@ -13,7 +13,7 @@
 
 ## Get Started
 
-`server.js`
+> `server.js`
 
 ```js
 const cds = require('@sap/cds')
@@ -22,7 +22,7 @@ applyChangeLog(cds)
 module.exports = cds.server
 ```
 
-`entity.cds`
+> `entity.cds`
 
 - **MUST** `using from 'cds-change-log'` statement in CDS model
 - **MUST** annotating `@cds.changelog.enabled` on elements
@@ -48,7 +48,7 @@ annotate People with {
 };
 ```
 
-`create and update objects`
+> `create and update objects`
 
 ```js
 let response = await axios.post("/sample/Peoples", { Name: "Theo Sun 2", Age: 39 })
@@ -56,11 +56,11 @@ const { ID } = response.data
 await axios.patch(`/sample/Peoples(${ID})`, { Name: "Theo Sun 9", Age: 12 })
 ```
 
-`generated change logs`
+> `generated change logs`
 
 <details>
   <summary>Click to expand sample logs</summary>
-  
+
 ```js
 [
   {
