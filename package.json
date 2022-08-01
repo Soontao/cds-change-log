@@ -48,7 +48,7 @@
     }
   },
   "overrides": {
-    "@sap/xsenv": "3.2.0"
+    "@sap/xsenv": "3.3.2"
   },
   "license": "Apache-2.0",
   "keywords": [
