@@ -6,7 +6,7 @@
   "description": "best practice of Change Log for CAP nodejs runtime",
   "engines": {
     "node": ">=12",
-    "npm": ">=6"
+    "npm": ">=7"
   },
   "author": {
     "name": "Theo Sun",
@@ -32,7 +32,6 @@
     "@typescript-eslint/eslint-plugin": "5.32.0",
     "@typescript-eslint/parser": "5.32.0",
     "eslint": "8.21.0",
-    "husky": "8.0.1",
     "jest": "29.0.3",
     "ts-jest": "29.0.0",
     "ts-node": "10.9.1",
