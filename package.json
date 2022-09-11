@@ -27,7 +27,7 @@
     "coverage": "npm test -- --coverage --no-cache"
   },
   "devDependencies": {
-    "@types/jest": "29.0.0",
+    "@types/jest": "29.0.1",
     "@types/node": "16.11.58",
     "@typescript-eslint/eslint-plugin": "5.32.0",
     "@typescript-eslint/parser": "5.32.0",
