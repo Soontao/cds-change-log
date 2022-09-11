@@ -27,12 +27,12 @@
     "coverage": "npm test -- --coverage --no-cache"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "17.0.3",
+    "@commitlint/config-conventional": "17.1.0",
     "@types/jest": "29.0.0",
     "@types/node": "16.11.48",
     "@typescript-eslint/eslint-plugin": "5.32.0",
     "@typescript-eslint/parser": "5.32.0",
-    "commitlint": "17.0.3",
+    "commitlint": "17.1.2",
     "eslint": "8.21.0",
     "husky": "8.0.1",
     "jest": "29.0.3",
