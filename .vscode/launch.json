@@ -2,6 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "run test app",
+      "request": "launch",
+      "runtimeArgs": [
+        "cds-ts",
+        "run"
+      ],
+      "runtimeExecutable": "npx",
+      "cwd": "${workspaceFolder}/test/app",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
+    {
       "type": "node",
       "name": "vscode-jest-tests",
       "request": "launch",
@@ -11,7 +25,6 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true,
       "program": "${workspaceFolder}/node_modules/jest/bin/jest",
       "envFile": "${workspaceFolder}/.env"
     }

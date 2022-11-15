@@ -1,6 +1,9 @@
 {
   "name": "test-app",
   "cds": {
+    "plugins": [
+      "../../src"
+    ],
     "requires": {
       "db": {
         "kind": "sql"

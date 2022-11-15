@@ -14,13 +14,16 @@
 
 ## Get Started
 
-> `server.js`
+> `package.json`
 
-```js
-const cds = require('@sap/cds')
-const { applyChangeLog } = require("cds-change-log")
-applyChangeLog(cds)
-module.exports = cds.server
+```json
+{
+  "cds": {
+    "plugins": [
+      "cds-change-log"
+    ]
+  }
+}
 ```
 
 > `entity.cds`

@@ -43,5 +43,8 @@
     "CAP",
     "Change Log",
     "Framework"
-  ]
+  ],
+  "dependencies": {
+    "cds-internal-tool": "^1.5.2"
+  }
 }

@@ -5,7 +5,7 @@ import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements, extractKeyNamesFromEntity } from "./entity";
 import { ChangeLogError } from "./error";
 import { extractEntityFromQuery } from "./query";
-import { CQN } from "./type";
+import { Query } from "./type";
 import { cwdRequire } from "./utils";
 
 
@@ -17,7 +17,7 @@ export function createChangeLogHandler(cds: any, db: any) {
   const compositions = cwdRequire("@sap/cds/libx/_runtime/common/composition");
   const { getFlatArray } = cwdRequire("@sap/cds/libx/_runtime/db/utils/deep");
 
-  async function changeLogHandler(req: { query: CQN, event: string, data?: any }) {
+  async function changeLogHandler(req: { query: Query, event: string, data?: any }) {
     const { query } = req;
     const entity = extractEntityFromQuery(query); // it could be entityName or ref objects
     const entityName = typeof entity === "string" ? entity : entity.ref[0]; // TODO: warning when other cases
@@ -79,12 +79,12 @@ export function createChangeLogHandler(cds: any, db: any) {
             await changeLogHandler({ query: insertion, event: "CREATE" });
           };
         } else {
-          (query.INSERT.entries ?? []).forEach((change: any) => queueChangeLogs(buildChangeLog(entityDef, context, undefined, change)));
+          (query.INSERT?.entries ?? []).forEach((change: any) => queueChangeLogs(buildChangeLog(entityDef, context, undefined, change)));
         }
         break;
       case "DELETE":
         if (compositions.hasDeepDelete(cds.model, query)) {
-          const deletions = getFlatArray(await compositions.getDeepDeleteCQNs(cds.model, req)).filter((cqn: CQN) => cqn !== query);
+          const deletions = getFlatArray(await compositions.getDeepDeleteCQNs(cds.model, req)).filter((cqn: Query) => cqn !== query);
           for (const deletion of deletions) {
             await changeLogHandler({ query: deletion, event: "DELETE" });
           }
