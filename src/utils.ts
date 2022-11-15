@@ -1,4 +1,4 @@
-import process from "process";
+import { cwdRequire } from "cds-internal-tool";
 
 /**
  * return null if strings are `null`/`undefined`
@@ -15,14 +15,7 @@ export const defaultStringOrNull = (...args: Array<any>) => {
   return null;
 };
 
-/**
- * require for current work directory
- * 
- * @param id 
- * @returns 
- */
-export const cwdRequire = (id: string) => require(require.resolve(id, { paths: [process.cwd()] }));
-
+export { cwdRequire };
 
 /**
  * utils for memorized (sync) **ONE-parameter** function

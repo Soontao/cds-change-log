@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
+import { cwdRequireCDS } from "cds-internal-tool";
 import { ANNOTATE_CHANGELOG_ENABLED, CHANGELOG_NAMESPACE } from "./constants";
 import { CDS, Definition, ElementDefinition, EntityDefinition } from "./type";
-import { cwdRequire, memorized } from "./utils";
+import { memorized } from "./utils";
 
 const IGNORED_TYPES = ["@cds.Association", "cds.Composition"];
 
@@ -69,11 +70,11 @@ export const isLocalizedAndChangeLogRelated = memorized((entityDef: EntityDefini
  * @param entityDef
  */
 export const isLocalizedEntityDef = memorized((entityDef: EntityDefinition) => {
-  const cds = cwdRequire("@sap/cds");
+  const cds = cwdRequireCDS();
   if (entityDef?.name?.length >= 6 && entityDef?.name?.endsWith(".texts")) {
     const rawEntityName = entityDef.name.substr(0, entityDef.name.length - 6);
     if (rawEntityName in cds.model?.definitions) {
-      if (isLocalizedAndChangeLogRelated(cds.model.definitions[rawEntityName])) {
+      if (isLocalizedAndChangeLogRelated(cds.model.definitions?.[rawEntityName] as EntityDefinition)) {
         return true;
       }
     }

@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
+import { cwdRequireCDS } from "cds-internal-tool";
 import { ACTIONS } from "./constants";
 import { ChangeLogContext } from "./context";
 import { extractChangeAwareElements } from "./entity";
 import { EntityDefinition } from "./type";
-import { cwdRequire, defaultStringOrNull } from "./utils";
+import { defaultStringOrNull } from "./utils";
 
 
 /**
@@ -26,7 +27,7 @@ export const buildChangeLog = (
   if (original === undefined && change === undefined) {
     throw new TypeError("require original data or change data at least");
   }
-  const cds = cwdRequire("@sap/cds");
+  const cds = cwdRequireCDS();
   const defaultLocale = cds?.env?.i18n?.default_language ?? "en";
 
   // determine action by inbound changed value and original database value
@@ -92,8 +93,8 @@ export const buildChangeLog = (
     ...keys, // if locale is key
     entityName,
     action,
-    actionBy: cds.context.user?.is?.("system-user") ? "system-user" : cds.context?.user?.id ?? "anonymous",
-    actionAt: cds.context.timestamp,
+    actionBy: cds.context?.user?.is?.("system-user") ? "system-user" : cds.context?.user?.id ?? "anonymous",
+    actionAt: cds.context?.timestamp,
     Items
   };
 
