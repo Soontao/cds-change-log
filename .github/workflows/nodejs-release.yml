@@ -22,7 +22,7 @@ jobs:
       - name: npm install
         run: npm install
 
-      - run: npm i --no-save @sap/cds@5 express sqlite3
+      - run: bash install_no_trace_deps.sh
 
       - name: npm test
         run: npm test
