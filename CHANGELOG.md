@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.8](https://github.com/Soontao/cds-change-log/compare/v0.0.7...v0.0.8) (2022-11-16)
+
+
+### Features
+
+* improve with plugin ([8cba21e](https://github.com/Soontao/cds-change-log/commit/8cba21e31bbbd9c054e1ed6c387f2f50b194d009))
+
 ### [0.0.7](https://github.com/Soontao/cds-change-log/compare/v0.0.6...v0.0.7) (2022-05-16)
 
 
