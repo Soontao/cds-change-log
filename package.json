@@ -5,7 +5,7 @@
   "cds.main": "./index.cds",
   "description": "best practice of Change Log for CAP nodejs runtime",
   "engines": {
-    "node": ">=12",
+    "node": ">=14",
     "npm": ">=7"
   },
   "author": {
