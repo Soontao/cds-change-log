@@ -1,12 +1,10 @@
 
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe("Basic Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
-
-  setupIgnoreStatus(axios)
 
   it('should support connect to service', async () => {
     const { data } = await axios.get("/sample/$metadata")

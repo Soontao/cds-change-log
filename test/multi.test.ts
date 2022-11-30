@@ -1,14 +1,13 @@
 
 import cds from "@sap/cds";
 import { ENTITIES } from "../src/constants";
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe("Multi Change Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
 
-  setupIgnoreStatus(axios)
 
   it('should support insert multi values', async () => {
 

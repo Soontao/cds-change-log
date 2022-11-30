@@ -1,10 +1,9 @@
 
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe('Exception Test Suite', () => {
   const axios = setupTest(__dirname, "./app")
-  setupIgnoreStatus(axios)
 
   it('should support use another key', async () => {
     const response = await axios.post("/sample/Orders3", { ID: 1, Amount: 99.99 })

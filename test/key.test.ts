@@ -1,12 +1,11 @@
 
 import cds from "@sap/cds";
 import { ENTITIES } from "../src/constants";
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe('Key Extension Test Suite', () => {
   const axios = setupTest(__dirname, "./app")
-  setupIgnoreStatus(axios)
 
   it('should support use another key', async () => {
     const response = await axios.post("/sample/Orders", { ID: 1, Amount: 99.99 })

@@ -1,13 +1,11 @@
 
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe("Composition Test Suite", () => {
 
   const cds = require("@sap/cds")
   const axios = setupTest(__dirname, "./app")
-
-  setupIgnoreStatus(axios)
 
   it('should support deep creation for composition', async () => {
     let response = await axios.post("/sample/Addresses", {

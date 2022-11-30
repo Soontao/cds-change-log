@@ -13,7 +13,7 @@ type CommonString : String(255);
 /**
  * **ChangeLog Action**, mapped by CQL event
  */
-type Action : String enum {
+type Action       : String enum {
   Create;
   Update;
   Delete;
@@ -39,12 +39,12 @@ entity ChangeLog : cuid {
   /**
    * default key storage for common model
    */
-  @cds.changelog.extension.entityKey :              true
-  @cds.changelog.extension.for.type  :              cds.UUID
+  @cds.changelog.extension.entityKey : true
+  @cds.changelog.extension.for.type  : cds.UUID
   entityKey        : UUID;
 
   @cds.changelog.extension.entityKey
-  @cds.changelog.extension.for.type  :              cds.Integer
+  @cds.changelog.extension.for.type  : cds.Integer
   entityKeyInteger : Integer;
 
   /**

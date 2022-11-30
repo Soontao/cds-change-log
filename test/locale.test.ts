@@ -1,10 +1,9 @@
 
-import { queryChangeLogs, setupIgnoreStatus, setupTest } from "./utils";
+import { queryChangeLogs, setupTest } from "./utils";
 
 
 describe('Locale Test Suite', () => {
   const axios = setupTest(__dirname, "./app")
-  setupIgnoreStatus(axios)
 
   it('should support use another key', async () => {
     let response = await axios.post("/sample/Books", { Name: "The Old Man and the Sea", Price: 88.12 }, {

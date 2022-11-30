@@ -1,12 +1,10 @@
 
-import { queryChangeLogs, setupIgnoreStatus, setupTest } from "./utils";
+import { queryChangeLogs, setupTest } from "./utils";
 
 
 describe("Draft Enabled Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
-
-  setupIgnoreStatus(axios)
 
   it('should support create records with draft enabled', async () => {
     let draftItemResponse = await axios.post("/sample/Forms", {}, {

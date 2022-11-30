@@ -1,12 +1,11 @@
 
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe("Extension Fields Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
 
-  setupIgnoreStatus(axios)
 
   it('should support extend annotation', async () => {
     let response = await axios.post("/sample/Peoples", { Name: "Theo Sun 2", Age: 39, SourceSystem: "SS1", Weight: 75.1 })

@@ -1,14 +1,12 @@
 
 import cds from "@sap/cds";
 import { ENTITIES } from "../src/constants";
-import { setupIgnoreStatus, setupTest } from "./utils";
+import { setupTest } from "./utils";
 
 
 describe("Auth Test Suite", () => {
 
   const axios = setupTest(__dirname, "./app")
-
-  setupIgnoreStatus(axios)
 
   it('should support create data with (user name)', async () => {
     const response = await axios.post("/auth/Peoples", { Name: "Theo Sun", Age: 27 }, {

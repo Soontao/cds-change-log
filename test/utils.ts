@@ -1,6 +1,5 @@
-import type { AxiosInstance } from "axios";
+import { cwdRequireCDS } from "cds-internal-tool";
 import { ENTITIES } from "../src/constants";
-import { CDS } from "../src/type";
 
 /**
  * setup a global test user with HTTP basic auth
@@ -14,20 +13,11 @@ export const setupBasicAuth = (axios: any) => {
   return axios
 }
 
-export const setupIgnoreStatus = (axios: any) => {
-  axios.defaults.validateStatus = () => true
-  return axios
-}
 
-export const setupTest = (...path: Array<string>): AxiosInstance => {
-  const cds = require("@sap/cds") as CDS
-  const { axios } = cds.test(".").in(...path)
-  return axios
-}
-
+export { setupTest } from "cds-internal-tool";
 
 export const queryChangeLogs = (where: { entityName: any, entityKey?: string, [key: string]: any }): Promise<Array<any>> => {
-  const cds = require("@sap/cds")
+  const cds = cwdRequireCDS()
   return cds.run(
     cds.ql.SELECT
       .from(ENTITIES.CHANGELOG, (c: any) => { c("*"), c.Items('*') })

@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { CDS, DatabaseService, EntityDefinition } from "cds-internal-tool";
 import { buildChangeLog } from "./change";
 import { ENTITIES } from "./constants";
 import { ChangeLogContext } from "./context";
@@ -9,10 +10,10 @@ import { Query } from "./type";
 import { cwdRequire } from "./utils";
 
 
-export function createChangeLogHandler(cds: any, db: any) {
+export function createChangeLogHandler(cds: CDS, db: DatabaseService) {
 
   const { INSERT, SELECT } = cds.ql;
-  const context = new ChangeLogContext(cds.model);
+  const context = new ChangeLogContext(cds.model); // REVISIT: extensibility tenant model
 
   const compositions = cwdRequire("@sap/cds/libx/_runtime/common/composition");
   const { getFlatArray } = cwdRequire("@sap/cds/libx/_runtime/db/utils/deep");
@@ -22,7 +23,7 @@ export function createChangeLogHandler(cds: any, db: any) {
     const entity = extractEntityFromQuery(query); // it could be entityName or ref objects
     const entityName = typeof entity === "string" ? entity : entity.ref[0]; // TODO: warning when other cases
 
-    const entityDef = cds.model.definitions[entityName];
+    const entityDef = cds.model.definitions[entityName] as EntityDefinition;
 
     const entityChangeLogElementKeys = extractChangeAwareElements(entityDef).map(ele => ele.name);
 
