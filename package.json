@@ -45,6 +45,6 @@
     "Framework"
   ],
   "dependencies": {
-    "cds-internal-tool": "^1.6.1"
+    "cds-internal-tool": "^1.6.2"
   }
 }
