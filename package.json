@@ -1,6 +1,6 @@
 {
   "name": "cds-change-log",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "lib/index.js",
   "cds.main": "./index.cds",
   "description": "best practice of Change Log for CAP nodejs runtime",
