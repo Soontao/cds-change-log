@@ -10,6 +10,13 @@ import { Query } from "./type";
 import { cwdRequire } from "./utils";
 
 
+/**
+ * Creates the change log handler function that will be called on CUD events.
+ * 
+ * @param cds - The CDS runtime instance
+ * @param db - The database service instance
+ * @returns The handler function that will process change log events
+ */
 export function createChangeLogHandler(cds: CDS, db: DatabaseService) {
 
   const { INSERT, SELECT } = cds.ql;

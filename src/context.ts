@@ -27,6 +27,12 @@ export class ChangeLogContext {
     this.#model = model;
   }
 
+  /**
+   * Finds the key name on the change log entity for the given entity type. 
+   * 
+   * Searches the change log entity definition for a non-association element that has 
+   * a type annotation matching the passed in type name. Returns the name of that element.
+   */
   public findKeyByType(type: string) {
     return Object
       .values(this.#changeLogDef?.elements ?? {})
