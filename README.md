@@ -19,9 +19,11 @@
 ```json
 {
   "cds": {
-    "plugins": [
-      "cds-change-log"
-    ]
+    "plugins": {
+      "cds-change-log": {
+        "impl": "cds-change-log"
+      }
+    }
   }
 }
 ```

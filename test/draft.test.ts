@@ -52,7 +52,7 @@ describe("Draft Enabled Test Suite", () => {
     expect(draftItemResponse.status).toBe(200)
 
     draftItemResponse = await axios.post(`/sample/Forms(ID=${ID},IsActiveEntity=false)/test.app.srv.s1.SampleService.draftActivate`)
-    expect(draftItemResponse.status).toBe(201)
+    expect(draftItemResponse.status).toBe(200)
 
     const logs = await queryChangeLogs({
       entityName: "Form",

@@ -11,13 +11,12 @@ const cds = cwdRequire("@sap/cds");
  * 
  * just simply use the `@cds.changelog.enabled` on entity and elements to record the changed values to database
  * 
- * 
  */
-const logger = cds.log("changelog.apply");
 
 cds.once("served", async () => {
+  const logger = cds.log("changelog.apply");
   if (ENTITIES.CHANGELOG in cds?.model?.definitions) {
-    const db = await cds.connect.to("db");
+    const { db } = cds.services;
     db.prepend((srv: any) => srv.before(
       ["CREATE", "UPDATE", "DELETE"],
       extractChangeLogAwareEntities(cds),
